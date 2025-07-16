@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Training Academy - Master Automobile Maintenance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/courses.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4L14.5 9H9.5L12 4Z" fill="currentColor"/>
+                <path d="M12 20L9.5 15H14.5L12 20Z" fill="currentColor"/>
+                <path d="M20 12L15 14.5V9.5L20 12Z" fill="currentColor"/>
+                <path d="M4 12L9 9.5V14.5L4 12Z" fill="currentColor"/>
+            </svg>
+            <h1>Auto Training Academy</h1>
+        </div>
+        <div class="nav-items">
+            <a href="#home">Home</a>
+            <a href="#courses">Courses</a>
+            <a href="#features">Features</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <button class="auth-btn" onclick="showLoginModal()">Login</button>
+            <button class="auth-btn" onclick="showRegisterModal()">Register</button>
+            <div class="user-menu" style="display: none;">
+                <a href="dashboard.html">Dashboard</a>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section" id="home">
+        <h1>Master the Art of<br>Automobile Excellence</h1>
+        <p>Join our comprehensive training program and become a certified automotive professional. Learn from industry experts and gain hands-on experience.</p>
+        <button class="cta-btn">Start Your Journey</button>
+    </section>
+
+    <section id="courses" class="courses-section">
+      <h2>Our Courses</h2>
+      <div class="course-list" id="course-list">
+        <!-- Courses will be dynamically loaded here -->
+      </div>
+    </section>
+
+    <section class="features-section" id="features">
+        <div class="section-header">
+            <h2>Why Choose Us</h2>
+            <p>Experience the best automotive training with our unique features</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3>Industry Expert Instructors</h3>
+                <p>Learn from certified professionals with years of real-world experience in automotive maintenance and repair.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 16V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 10L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 14L13 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3>Hands-on Training</h3>
+                <p>Get practical experience with real vehicles and industry-standard diagnostic equipment in our state-of-the-art facility.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3>Flexible Learning</h3>
+                <p>Choose from various schedule options and learning paths that fit your needs and career goals.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M19.4 15C19.1277 15.6171 19.0717 16.3081 19.2401 16.9606C19.4085 17.6131 19.7931 18.1952 20.3348 18.6261C20.8766 19.0569 21.5484 19.3101 22.2477 19.3492C22.9469 19.3882 23.6433 19.2115 24.2348 18.8401C24.8264 18.4687 25.2828 17.9241 25.5373 17.2873C25.7917 16.6504 25.8308 15.9542 25.6493 15.2964C25.4677 14.6386 25.0745 14.0533 24.5266 13.6222C23.9787 13.1911 23.3021 12.9377 22.6 12.9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3>Career Support</h3>
+                <p>Benefit from our industry connections and job placement assistance to kickstart your automotive career.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2>Welcome Back</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">Sign In</button>
+            </form>
+            <p>Don't have an account? <a href="#" onclick="hideModals(); showRegisterModal();">Create one now</a></p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <h2>Create Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" name="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" name="password" placeholder="Choose a strong password" required>
+                </div>
+                <div class="form-group">
+                    <label for="card-element">Credit or debit card</label>
+                    <div id="card-element"></div>
+                </div>
+                <button type="submit">Create Account</button>
+            </form>
+            <div id="paypal-button-container"></div>
+            <button id="paystack-button">Pay with Paystack</button>
+            <p>Already have an account? <a href="#" onclick="hideModals(); showLoginModal();">Sign in here</a></p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2023 Auto Training Academy. All rights reserved.</p>
+            <div class="social-links">
+                <a href="#" class="social-icon"><img src="https://img.icons8.com/ios-filled/50/000000/facebook-new.png" alt="Facebook"></a>
+                <a href="#" class="social-icon"><img src="https://img.icons8.com/ios-filled/50/000000/twitter.png" alt="Twitter"></a>
+                <a href="#" class="social-icon"><img src="https://img.icons8.com/ios-filled/50/000000/instagram-new.png" alt="Instagram"></a>
+                <a href="#" class="social-icon"><img src="https://img.icons8.com/ios-filled/50/000000/linkedin.png" alt="LinkedIn"></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="https.js.stripe.com/v3/"></script>
+</body>
+</html>

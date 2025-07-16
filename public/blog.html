@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Auto Training Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/blog.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4L14.5 9H9.5L12 4Z" fill="currentColor"/>
+                <path d="M12 20L9.5 15H14.5L12 20Z" fill="currentColor"/>
+                <path d="M20 12L15 14.5V9.5L20 12Z" fill="currentColor"/>
+                <path d="M4 12L9 9.5V14.5L4 12Z" fill="currentColor"/>
+            </svg>
+            <h1>Auto Training Academy</h1>
+        </div>
+        <div class="nav-items">
+            <a href="index.html">Home</a>
+            <a href="index.html#courses">Courses</a>
+            <a href="blog.html" class="active">Blog</a>
+            <a href="contact.html">Contact</a>
+            <button class="auth-btn" onclick="showLoginModal()">Login</button>
+            <button class="auth-btn" onclick="showRegisterModal()">Register</button>
+            <div class="user-menu" style="display: none;">
+                <a href="dashboard.html">Dashboard</a>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-section">
+        <div class="section-header">
+            <h2>Latest Articles</h2>
+            <p>Stay updated with the latest trends in automotive technology</p>
+        </div>
+
+        <div class="blog-grid">
+            <article class="blog-card">
+                <div class="blog-image">
+                    <img src="https://via.placeholder.com/600x400" alt="Electric Vehicle Maintenance">
+                </div>
+                <div class="blog-content">
+                    <h3>Essential Tips for Electric Vehicle Maintenance</h3>
+                    <p class="blog-meta">By John Doe | January 15, 2024</p>
+                    <p class="blog-excerpt">Learn the key maintenance requirements for electric vehicles and how they differ from traditional combustion engines.</p>
+                    <a href="#" class="read-more">Read More</a>
+                </div>
+            </article>
+
+            <article class="blog-card">
+                <div class="blog-image">
+                    <img src="https://via.placeholder.com/600x400" alt="Diagnostic Tools">
+                </div>
+                <div class="blog-content">
+                    <h3>Modern Diagnostic Tools in Automotive Repair</h3>
+                    <p class="blog-meta">By Jane Smith | January 12, 2024</p>
+                    <p class="blog-excerpt">Discover how advanced diagnostic tools are revolutionizing the automotive repair industry.</p>
+                    <a href="#" class="read-more">Read More</a>
+                </div>
+            </article>
+
+            <article class="blog-card">
+                <div class="blog-image">
+                    <img src="https://via.placeholder.com/600x400" alt="Hybrid Technology">
+                </div>
+                <div class="blog-content">
+                    <h3>Understanding Hybrid Vehicle Technology</h3>
+                    <p class="blog-meta">By Mike Johnson | January 10, 2024</p>
+                    <p class="blog-excerpt">A comprehensive guide to hybrid vehicle systems and their maintenance requirements.</p>
+                    <a href="#" class="read-more">Read More</a>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2>Welcome Back</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">Sign In</button>
+            </form>
+            <p>Don't have an account? <a href="#" onclick="hideModals(); showRegisterModal();">Create one now</a></p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <h2>Create Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" name="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" name="password" placeholder="Choose a strong password" required>
+                </div>
+                <button type="submit">Create Account</button>
+            </form>
+            <p>Already have an account? <a href="#" onclick="hideModals(); showLoginModal();">Sign in here</a></p>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

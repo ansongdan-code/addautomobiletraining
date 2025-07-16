@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Auto Training Academy</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h1>Auto Training Academy</h1>
+        </div>
+        <div class="nav-items">
+            <a href="index.html">Home</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="user-profile">
+                <!-- User profile will be loaded here -->
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-link active" data-section="progress">Progress</a>
+                <a href="#" class="sidebar-link" data-section="certificates">Certificates</a>
+                <a href="#" class="sidebar-link" data-section="settings">Settings</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section id="progress" class="progress-section">
+                <!-- Progress content will be loaded here -->
+            </section>
+
+            <section id="certificates" class="certificates-section" style="display: none;">
+                <!-- Certificates content will be loaded here -->
+            </section>
+
+            <section id="settings" class="settings-section" style="display: none;">
+                <h2>Account Settings</h2>
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="updateName">Name:</label>
+                        <input type="text" id="updateName" name="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateEmail">Email:</label>
+                        <input type="email" id="updateEmail" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password:</label>
+                        <input type="password" id="currentPassword" name="currentPassword">
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password:</label>
+                        <input type="password" id="newPassword" name="newPassword">
+                    </div>
+                    <button type="submit" class="update-btn">Update Profile</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

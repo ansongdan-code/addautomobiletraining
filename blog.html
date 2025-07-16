@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Automobile Training Academy</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="blog.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">Automobile Training Academy</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="blog.html" class="active">Blog</a>
+            <a href="contact.html">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Blog Container -->
+    <div class="blog-container">
+        <!-- Blog Header -->
+        <header class="blog-header">
+            <h1>Automotive Training Insights</h1>
+            <p>Stay updated with the latest trends, tips, and techniques in automotive training</p>
+            
+            <!-- Search Bar -->
+            <form class="blog-search">
+                <input type="text" placeholder="Search articles..." required>
+                <button type="submit">Search</button>
+            </form>
+
+            <!-- Category Filters -->
+            <div class="blog-categories">
+                <button class="category-btn active" data-category="all">All</button>
+                <button class="category-btn" data-category="maintenance">Maintenance</button>
+                <button class="category-btn" data-category="technology">Technology</button>
+                <button class="category-btn" data-category="safety">Safety</button>
+                <button class="category-btn" data-category="tips">Tips & Tricks</button>
+            </div>
+        </header>
+
+        <!-- Main Blog Content -->
+        <main class="blog-content">
+            <!-- Featured Post -->
+            <section class="featured-post">
+                <article class="post-card">
+                    <img src="https://source.unsplash.com/1200x600/?automotive-workshop" alt="Featured Post">
+                    <div class="post-content">
+                        <span class="category">Featured</span>
+                        <div class="post-meta">
+                            <span>By John Smith</span>
+                            <span>January 15, 2024</span>
+                        </div>
+                        <h2>The Future of Automotive Training: Embracing Virtual Reality</h2>
+                        <p>Discover how virtual reality technology is revolutionizing automotive training programs, providing immersive learning experiences that enhance skill development and practical understanding...</p>
+                        <a href="#" class="read-more">Read More →</a>
+                    </div>
+                </article>
+            </section>
+
+            <!-- Recent Posts Grid -->
+            <section class="posts-grid">
+                <!-- Posts will be dynamically populated by JavaScript -->
+            </section>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="prev-page">Previous</button>
+                <div class="page-numbers">
+                    <!-- Page numbers will be dynamically populated -->
+                </div>
+                <button class="next-page">Next</button>
+            </div>
+        </main>
+
+        <!-- Blog Sidebar -->
+        <aside class="blog-sidebar">
+            <!-- About Blog Section -->
+            <section class="sidebar-section about-blog">
+                <h3>About Our Blog</h3>
+                <p>Welcome to the Automobile Training Academy blog, your trusted source for automotive knowledge, industry insights, and expert tips. Our articles are crafted by experienced professionals to help you stay ahead in the automotive world.</p>
+            </section>
+
+            <!-- Popular Posts -->
+            <section class="sidebar-section popular-posts">
+                <h3>Popular Posts</h3>
+                <ul>
+                    <li>
+                        <a href="#">
+                            <img src="https://source.unsplash.com/100x100/?car-engine" alt="Popular Post 1">
+                            <div>
+                                <h4>Essential Diagnostic Tools Every Mechanic Needs</h4>
+                                <span>December 28, 2023</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img src="https://source.unsplash.com/100x100/?car-repair" alt="Popular Post 2">
+                            <div>
+                                <h4>Top 10 Car Maintenance Mistakes to Avoid</h4>
+                                <span>December 20, 2023</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img src="https://source.unsplash.com/100x100/?car-safety" alt="Popular Post 3">
+                            <div>
+                                <h4>Safety First: Essential Workshop Practices</h4>
+                                <span>December 15, 2023</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Categories -->
+            <section class="sidebar-section categories">
+                <h3>Categories</h3>
+                <ul>
+                    <li><a href="#">Maintenance <span>(12)</span></a></li>
+                    <li><a href="#">Technology <span>(8)</span></a></li>
+                    <li><a href="#">Safety <span>(6)</span></a></li>
+                    <li><a href="#">Tips & Tricks <span>(15)</span></a></li>
+                    <li><a href="#">Industry News <span>(4)</span></a></li>
+                </ul>
+            </section>
+
+            <!-- Newsletter -->
+            <section class="sidebar-section newsletter">
+                <h3>Newsletter</h3>
+                <p>Subscribe to our newsletter and stay updated with the latest automotive insights.</p>
+                <form>
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit">Subscribe</button>
+                </form>
+            </section>
+
+            <!-- Popular Tags -->
+            <section class="sidebar-section">
+                <h3>Popular Tags</h3>
+                <div class="tag-cloud">
+                    <a href="#" class="tag">Maintenance</a>
+                    <a href="#" class="tag">Engine</a>
+                    <a href="#" class="tag">Safety</a>
+                    <a href="#" class="tag">Diagnostics</a>
+                    <a href="#" class="tag">Electric</a>
+                    <a href="#" class="tag">Tools</a>
+                    <a href="#" class="tag">Training</a>
+                    <a href="#" class="tag">Tips</a>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <script src="blog.js"></script>
+</body>
+</html>

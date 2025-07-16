@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Automotive Diagnoses",
+    "description": "Learn how to diagnose and troubleshoot complex automotive issues using the latest diagnostic tools and techniques.",
+    "price": 199,
+    "image": "course-1.jpg"
+  },
+  {
+    "title": "Reading Wiring Diagrams",
+    "description": "Master the art of reading and interpreting automotive wiring diagrams to effectively diagnose electrical problems.",
+    "price": 149,
+    "image": "course-2.jpg"
+  },
+  {
+    "title": "Vehicle Programming",
+    "description": "Gain hands-on experience in vehicle programming, including ECU flashing, key programming, and module configuration.",
+    "price": 299,
+    "image": "course-3.jpg"
+  },
+  {
+    "title": "Understanding Vehicle Sensors",
+    "description": "Deep dive into the world of vehicle sensors, learning how they work, how to test them, and their role in modern vehicle systems.",
+    "price": 179,
+    "image": "course-4.jpg"
+  }
+]
