@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './App.css';
-import Dashboard from './Dashboard';
-import Blog from './Blog';
-import Contact from './Contact';
-import Admin from './Admin';
-import Payment from './Payment';
+
+// Lazy load components for better performance
+const Dashboard = React.lazy(() => import('./Dashboard'));
+const Blog = React.lazy(() => import('./Blog'));
+const Contact = React.lazy(() => import('./Contact'));
+const Admin = React.lazy(() => import('./Admin'));
+const Payment = React.lazy(() => import('./Payment'));
 
 // Basic notification utility
 export const showNotification = (message, type = 'info') => {
@@ -479,11 +481,31 @@ function App() {
               </section>
             </div>
           } />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/payment" element={<Payment />} />
-          <Route path="/admin" element={<Admin showNotification={showNotification} />} />
+          <Route path="/dashboard" element={
+            <Suspense fallback={<div className="loading">Loading Dashboard...</div>}>
+              <Dashboard />
+            </Suspense>
+          } />
+          <Route path="/blog" element={
+            <Suspense fallback={<div className="loading">Loading Blog...</div>}>
+              <Blog />
+            </Suspense>
+          } />
+          <Route path="/contact" element={
+            <Suspense fallback={<div className="loading">Loading Contact...</div>}>
+              <Contact />
+            </Suspense>
+          } />
+          <Route path="/payment" element={
+            <Suspense fallback={<div className="loading">Loading Payment...</div>}>
+              <Payment />
+            </Suspense>
+          } />
+          <Route path="/admin" element={
+            <Suspense fallback={<div className="loading">Loading Admin...</div>}>
+              <Admin showNotification={showNotification} />
+            </Suspense>
+          } />
         </Routes>
       </main>
 

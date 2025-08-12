@@ -49,7 +49,7 @@ async (req, res) => {
     res.json({ token });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -79,12 +79,17 @@ async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
+    // Add check for isActive status
+    if (!user.isActive) {
+      return res.status(400).json({ msg: 'Account is deactivated' });
+    }
+
     const token = generateToken(user.id);
 
     res.json({ token });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -95,7 +100,7 @@ router.get('/me', protect, async (req, res) => {
     res.json(user);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

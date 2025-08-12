@@ -185,7 +185,7 @@ blogPostSchema.virtual('totalShares').get(function() {
 
 // Indexes for performance and search
 blogPostSchema.index({ title: 'text', excerpt: 'text', content: 'text', tags: 'text' });
-blogPostSchema.index({ slug: 1 });
+
 blogPostSchema.index({ category: 1 });
 blogPostSchema.index({ status: 1 });
 blogPostSchema.index({ featured: -1 });

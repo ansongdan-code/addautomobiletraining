@@ -63,13 +63,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // MongoDB connection with optimizations
 mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   maxPoolSize: 10,
   serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-  bufferCommands: false,
-  bufferMaxEntries: 0
+  socketTimeoutMS: 45000
 })
 .then(() => console.log('MongoDB connected successfully'))
 .catch(err => {
@@ -250,15 +246,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    error: 'Route not found'
-  });
-});
 
-"""// Serve React app in production
+// Serve React app in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'build')));
 
@@ -267,16 +256,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error('Global error:', err);
-  res.status(500).json({
-    success: false,
-    error: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : err.message
-  });
-});""
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {

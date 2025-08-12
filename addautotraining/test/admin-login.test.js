@@ -28,10 +28,7 @@ describe('Admin Login Test Suite', () => {
 
   beforeAll(async () => {
     // Connect to test database
-    await mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(MONGO_URI);
 
     // Clear test data
     await User.deleteMany({});
@@ -39,13 +36,14 @@ describe('Admin Login Test Suite', () => {
 
   beforeEach(async () => {
     // Create test users
-    const hashedPassword = await bcrypt.hash('password123', 12);
+    // Pass plain password, let pre-save hook handle hashing
+    const plainPassword = 'password123';
 
     // Create admin user
     adminUser = new User({
       name: 'Admin User',
       email: 'admin@test.com',
-      password: hashedPassword,
+      password: plainPassword,
       role: 'admin',
       isActive: true,
       isEmailVerified: true
@@ -56,7 +54,7 @@ describe('Admin Login Test Suite', () => {
     regularUser = new User({
       name: 'Regular User',
       email: 'user@test.com',
-      password: hashedPassword,
+      password: plainPassword,
       role: 'student',
       isActive: true,
       isEmailVerified: true
@@ -69,8 +67,10 @@ describe('Admin Login Test Suite', () => {
   });
 
   afterEach(async () => {
-    // Clean up test data
-    await User.deleteMany({});
+    // Clean up test data only if connection is open
+    if (mongoose.connection.readyState === 1) { // 1 means connected
+      await User.deleteMany({});
+    }
   });
 
   afterAll(async () => {
@@ -152,16 +152,8 @@ describe('Admin Login Test Suite', () => {
           password: 'password123'
         });
 
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('token');
-
-      // Try to access admin endpoint with token
-      const adminResponse = await request(app)
-        .get('/api/admin/dashboard')
-        .set('Authorization', `Bearer ${response.body.token}`);
-
-      expect(adminResponse.status).toBe(401);
-      expect(adminResponse.body.error).toBe('Account is deactivated');
+      expect(response.status).toBe(400);
+      expect(response.body.msg).toBe('Account is deactivated');
     });
   });
 
@@ -265,12 +257,12 @@ describe('Admin Login Test Suite', () => {
     let superAdminToken;
 
     beforeEach(async () => {
-      const hashedPassword = await bcrypt.hash('password123', 12);
+      const plainPassword = 'password123';
       
       superAdminUser = new User({
         name: 'Super Admin',
         email: 'superadmin@test.com',
-        password: hashedPassword,
+        password: plainPassword,
         role: 'super_admin',
         isActive: true,
         isEmailVerified: true
@@ -360,10 +352,7 @@ describe('Admin Login Test Suite', () => {
       expect(response.body).toHaveProperty('error');
 
       // Reconnect for other tests
-      await mongoose.connect(MONGO_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
+      await mongoose.connect(MONGO_URI);
     });
   });
 });

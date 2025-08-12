@@ -1,70 +1,164 @@
-# Getting Started with Create React App
+# Auto Training Academy
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A comprehensive automotive training platform built with React, Node.js, and MongoDB. The platform provides online courses, payment processing, admin management, and student dashboard functionality.
 
-## Available Scripts
+## 🚗 Features
 
-In the project directory, you can run:
+### Frontend (React)
+- **Responsive Design**: Mobile-first, responsive web application
+- **User Authentication**: Secure login/registration with JWT tokens
+- **Course Catalog**: Browse automotive training courses by category and skill level
+- **Student Dashboard**: Track progress, access enrolled courses
+- **Payment Integration**: PayPal and Paystack payment gateways
+- **Blog System**: Educational content and industry news
+- **Contact Forms**: Direct communication with instructors
+- **Admin Panel**: Complete course and user management
 
-### `npm start`
+### Backend (Node.js/Express)
+- **RESTful API**: Well-structured API endpoints
+- **Authentication & Authorization**: JWT-based auth with role-based access
+- **Database Integration**: MongoDB with Mongoose ODM
+- **File Upload**: Cloudinary integration for media files
+- **Security**: Helmet, CORS, rate limiting, and data validation
+- **Payment Processing**: PayPal and Paystack integrations
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🛠️ Technology Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Frontend**: React 18, React Router 6, Axios
+- **Backend**: Node.js, Express 5, MongoDB, Mongoose
+- **Security**: Helmet, JWT, CORS, Rate Limiting
+- **Payments**: PayPal, Paystack
+- **Testing**: Jest, React Testing Library, Supertest
+- **Build Tools**: React Scripts, Babel, ESLint
 
-### `npm test`
+## 📋 Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Node.js (v18.14.0 or higher)
+- npm (v8.0.0 or higher)
+- MongoDB (v5.0 or higher)
 
-### `npm run build`
+## 🚀 Quick Start
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 1. Clone and Install
+```bash
+git clone https://github.com/username/addautotraining.git
+cd addautotraining
+npm install
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 2. Environment Setup
+Create a `.env` file:
+```env
+MONGO_URI=mongodb://localhost:27017/addautotraining
+JWT_SECRET=your-jwt-secret
+PAYPAL_CLIENT_ID=your-paypal-client-id
+PAYPAL_CLIENT_SECRET=your-paypal-secret
+REACT_APP_PAYPAL_CLIENT_ID=your-paypal-client-id
+NODE_ENV=development
+PORT=5000
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 3. Start the Application
+```bash
+# Development mode (both frontend and backend)
+npm run dev
 
-### `npm run eject`
+# Backend only
+npm start
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# Production build
+npm run build
+npm run start:prod
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🧪 Testing
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+# Run all tests
+npm run test:all
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# React component tests
+npm test
 
-## Learn More
+# Server/API tests
+npm run test:server
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# Test coverage
+npm run test:coverage
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 📚 API Endpoints
 
-### Code Splitting
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/auth/me` - Get current user
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Courses
+- `GET /api/courses` - Get all courses
+- `GET /api/courses/:id` - Get specific course
+- `POST /api/courses` - Create course (Admin)
+- `PUT /api/courses/:id` - Update course (Admin)
 
-### Analyzing the Bundle Size
+### Admin
+- `GET /api/admin/users` - Get all users
+- `POST /api/admin/users` - Create user
+- `PUT /api/admin/users/:id` - Update user
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🎨 Project Structure
 
-### Making a Progressive Web App
+```
+addautotraining/
+├── public/           # Static assets
+├── src/             # React frontend
+│   ├── components/  # React components
+│   └── ...
+├── models/          # MongoDB models
+├── routes/          # Express routes
+├── middleware/      # Custom middleware
+├── test/           # Test files
+└── ...
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 🚀 Deployment
 
-### Advanced Configuration
+### Production Build
+```bash
+npm run build:prod
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Environment Variables
+Update `.env.production` with production values:
+- Use strong JWT secrets
+- Configure production database URI
+- Set up production payment credentials
 
-### Deployment
+## 🔐 Security Features
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- JWT authentication with expiration
+- Password hashing with bcrypt
+- Rate limiting on API endpoints
+- CORS protection
+- Input validation and sanitization
+- Security headers with Helmet
 
-### `npm run build` fails to minify
+## 🤝 Contributing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Write tests
+5. Submit a pull request
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 📞 Support
+
+- Email: contact@autotrainingacademy.com
+- Issues: [GitHub Issues](https://github.com/username/addautotraining/issues)
+
+---
+
+**Built with ❤️ for automotive education**
