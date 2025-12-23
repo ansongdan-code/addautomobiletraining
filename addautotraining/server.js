@@ -1,9 +1,19 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const paypal = require('@paypal/checkout-server-sdk');
+// PayPal SDK is optional; only require if available at runtime to avoid crashes
+let paypal = null;
+try {
+  // attempt to require but do not throw if missing
+  paypal = require('@paypal/checkout-server-sdk');
+} catch (e) {
+  console.log('PayPal checkout-server-sdk not available, legacy PayPal routes will be disabled');
+}
 const path = require('path');
 const compression = require('compression');
 require('dotenv').config();
+
+// Safe defaults for frontend URL used by CORS
+const FRONTEND_URL = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'http://localhost:3000' : 'http://localhost:3000');
 
 const User = require('./models/User');
 const Course = require('./models/Course');
@@ -17,6 +27,7 @@ const videoRoutes = require('./routes/video');
 const adminRoutes = require('./routes/admin');
 const blogRoutes = require('./routes/blog');
 const paymentRoutes = require('./routes/payment');
+const websiteEditorRoutes = require('./routes/website-editor');
 
 const app = express();
 
@@ -48,9 +59,7 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
-    : 'http://localhost:3000',
+  origin: FRONTEND_URL,
   credentials: true
 }));
 
@@ -61,17 +70,23 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// MongoDB connection with optimizations
-mongoose.connect(process.env.MONGO_URI, {
-  maxPoolSize: 10,
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
-});
+// MongoDB connection with optimizations and retry logic
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000
+    });
+    console.log('MongoDB connected successfully');
+  } catch (err) {
+    console.error('MongoDB connection error:', err.message);
+    console.log('Retrying MongoDB connection in 5 seconds...');
+    setTimeout(connectDB, 5000);
+  }
+};
+
+connectDB();
 
 // Rate limiting with different limits for different endpoints
 const generalLimiter = rateLimit({
@@ -117,11 +132,12 @@ app.use('/api/videos', videoRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/website', websiteEditorRoutes);
 
 // PayPal integration (legacy)
 const clientId = process.env.PAYPAL_CLIENT_ID;
 const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-if (clientId && clientSecret) {
+if (paypal && clientId && clientSecret) {
   const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
   const client = new paypal.core.PayPalHttpClient(environment);
   

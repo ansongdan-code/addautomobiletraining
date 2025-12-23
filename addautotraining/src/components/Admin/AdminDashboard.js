@@ -10,6 +10,7 @@ const UserManager = lazy(() => import('./UserManager'));
 const CourseManager = lazy(() => import('./CourseManager'));
 const VideoManager = lazy(() => import('./VideoManager'));
 const Analytics = lazy(() => import('./Analytics'));
+const WebsiteEditor = lazy(() => import('./WebsiteEditor'));
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -184,6 +185,26 @@ const AdminDashboard = () => {
               Analytics
             </button>
           </li>
+          <li className={`nav-item ${activeTab === 'editor' ? 'active' : ''}`}>
+            <button 
+              onClick={() => setActiveTab('editor')}
+              className="nav-link"
+              aria-label="Website Editor"
+            >
+              <i className="fas fa-edit"></i>
+              Website Editor
+            </button>
+          </li>
+          <li className={`nav-item ${activeTab === 'theme' ? 'active' : ''}`}>
+            <button 
+              onClick={() => setActiveTab('theme')}
+              className="nav-link"
+              aria-label="Theme & UI"
+            >
+              <i className="fas fa-palette"></i>
+              Theme & UI
+            </button>
+          </li>
         </ul>
       </nav>
 
@@ -255,6 +276,7 @@ const AdminDashboard = () => {
             {activeTab === 'courses' && <CourseManager />}
             {activeTab === 'videos' && <VideoManager />}
             {activeTab === 'analytics' && <Analytics />}
+            {activeTab === 'editor' && <WebsiteEditor userRole={JSON.parse(localStorage.getItem('user'))?.role} />}
           </Suspense>
         )}
       </main>
