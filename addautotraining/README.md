@@ -133,6 +133,50 @@ Update `.env.production` with production values:
 - Configure production database URI
 - Set up production payment credentials
 
+### Docker / Production (Optional)
+If you prefer to run with Docker, there's a `docker-compose.yml` included to run MongoDB, the backend, and the frontend.
+
+1. Build and start the stack:
+```bash
+docker-compose up --build -d
+```
+
+2. The backend will be reachable at `http://localhost:5000` and the frontend at `http://localhost:3000`.
+
+3. **Admin users are auto-created on every backend container startup** via `docker-init.js`:
+   - **Admin:** `admin@test.com` / `admin123`
+   - **Super Admin:** `superadmin@test.com` / `superadmin123`
+
+   The `docker-init.js` script runs before the Express server starts and automatically creates these users if they don't already exist in MongoDB. This ensures the application always has admin accounts available.
+
+4. **Verify the provisioning** by checking backend logs:
+```bash
+docker-compose logs backend | grep "Docker Init"
+```
+
+   Expected output:
+   ```
+   [Docker Init] Connecting to MongoDB...
+   [Docker Init] Connected to MongoDB
+   [Docker Init] ✓ admin user created: admin@test.com
+   [Docker Init] ✓ super_admin user created: superadmin@test.com
+   [Docker Init] Admin users provisioning complete
+   ```
+
+5. **Test a login** to verify everything works:
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"superadmin@test.com","password":"superadmin123"}'
+```
+
+   Expected response (HTTP 200):
+   ```json
+   {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+   ```
+
+Note: Keeping `scripts/` out of production images is recommended. The above command mounts project files into a temporary container and runs the creation script against the `mongo` service.
+
 ## 🔐 Security Features
 
 - JWT authentication with expiration
