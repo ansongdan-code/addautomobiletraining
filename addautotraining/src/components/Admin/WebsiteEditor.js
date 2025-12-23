@@ -24,6 +24,11 @@ const WebsiteEditor = ({ userRole }) => {
     seoKeywords: []
   });
 
+  // Fetch pages on mount
+  useEffect(() => {
+    fetchPages();
+  }, []);
+
   // Check authorization
   if (userRole !== 'super_admin') {
     return (
@@ -35,11 +40,6 @@ const WebsiteEditor = ({ userRole }) => {
       </div>
     );
   }
-
-  // Fetch pages on mount
-  useEffect(() => {
-    fetchPages();
-  }, []);
 
   const fetchPages = async () => {
     try {
@@ -74,6 +74,8 @@ const WebsiteEditor = ({ userRole }) => {
     });
     setIsEditing(true);
     setIsCreating(false);
+    setError('');
+    setSuccess('');
   };
 
   const handleNewPage = () => {
@@ -96,10 +98,19 @@ const WebsiteEditor = ({ userRole }) => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    if (name === 'seoKeywords') {
+      // Handle keywords as comma-separated string
+      const keywordsArray = value.split(',').map(k => k.trim()).filter(k => k);
+      setFormData({
+        ...formData,
+        [name]: keywordsArray
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === 'checkbox' ? checked : value
+      });
+    }
   };
 
   const handleSave = async () => {
@@ -151,25 +162,6 @@ const WebsiteEditor = ({ userRole }) => {
       console.error(err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePublish = async (pageId, newStatus) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.put(`/api/website/editor/pages/${pageId}/publish`, 
-        { isPublished: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setPages(pages.map(p => p._id === pageId ? response.data.data : p));
-      if (selectedPage?._id === pageId) {
-        setSelectedPage(response.data.data);
-      }
-      setSuccess(newStatus ? 'Page published!' : 'Page unpublished!');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError('Failed to update page status');
-      console.error(err);
     }
   };
 
@@ -315,6 +307,18 @@ const WebsiteEditor = ({ userRole }) => {
                       placeholder="Meta description for search engines"
                       rows="3"
                     />
+                  </div>
+
+                  <div className="form-group">
+                    <label>SEO Keywords</label>
+                    <input
+                      type="text"
+                      name="seoKeywords"
+                      value={Array.isArray(formData.seoKeywords) ? formData.seoKeywords.join(', ') : ''}
+                      onChange={handleInputChange}
+                      placeholder="Comma-separated keywords"
+                    />
+                    <small>Separate keywords with commas</small>
                   </div>
                 </div>
 
