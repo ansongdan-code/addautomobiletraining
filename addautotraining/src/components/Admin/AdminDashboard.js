@@ -21,6 +21,7 @@ const AdminDashboard = () => {
 
   // Memoized API call function
   const fetchDashboardStats = useCallback(async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('/api/admin/dashboard', {
@@ -33,47 +34,30 @@ const AdminDashboard = () => {
       if (response.ok) {
         const data = await response.json();
         setStats(data.data.stats);
-        setLoading(false);
       } else if (response.status === 401) {
         showNotification('Session expired. Please login again.', 'error');
-        setLoading(false);
         navigate('/');
       } else {
         showNotification('Failed to fetch dashboard stats', 'error');
-        setLoading(false);
       }
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
       showNotification('Network error. Please try again.', 'error');
+    } finally {
       setLoading(false);
     }
   }, [navigate]);
 
   useEffect(() => {
     // Check if user is admin
-    const user = localStorage.getItem('user');
-    if (!user) {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
       showNotification('Access denied. Admin privileges required.', 'error');
       navigate('/');
       return;
     }
 
-    try {
-      const parsedUser = JSON.parse(user);
-      if (parsedUser.role !== 'admin' && parsedUser.role !== 'super_admin') {
-        showNotification('Access denied. Admin privileges required.', 'error');
-        navigate('/');
-        return;
-      }
-      setUserRole(parsedUser.role);
-    } catch (error) {
-      console.error('Error parsing user:', error);
-      showNotification('Authentication error. Please log in again.', 'error');
-      navigate('/');
-      return;
-    }
-
-    setLoading(true);
+    setUserRole(user.role);
     fetchDashboardStats();
   }, [fetchDashboardStats, navigate]);
 
