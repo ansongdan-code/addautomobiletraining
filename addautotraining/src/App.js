@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 
 // Lazy load components for better performance
@@ -43,6 +43,7 @@ function App() {
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Check for existing user on component mount
   useEffect(() => {
@@ -51,6 +52,86 @@ function App() {
       setUser(JSON.parse(storedUser));
     }
   }, []);
+
+  // Inject page-level custom CSS (from WebsiteEditor) into document head
+  useEffect(() => {
+    const path = location.pathname || '/';
+
+    const slugForPath = (p) => {
+      if (p === '/' || p === '') return 'home';
+      if (p.startsWith('/blog')) return 'blog';
+      if (p.startsWith('/contact')) return 'contact';
+      return null;
+    };
+
+    const slug = slugForPath(path);
+    const styleId = 'page-custom-css';
+
+    const removeStyle = () => {
+      const existing = document.getElementById(styleId);
+      if (existing) existing.remove();
+    };
+
+    if (!slug) {
+      removeStyle();
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/website/pages/${slug}`);
+        if (!res.ok) {
+          removeStyle();
+          return;
+        }
+        const data = await res.json();
+        if (cancelled) return;
+        const css = data.data && data.data.customCSS ? data.data.customCSS : '';
+
+        // update or create style tag
+        let styleTag = document.getElementById(styleId);
+        if (!styleTag) {
+          styleTag = document.createElement('style');
+          styleTag.id = styleId;
+          document.head.appendChild(styleTag);
+        }
+        styleTag.innerHTML = css || '';
+
+        // Inject page-level custom JavaScript safely
+        const jsId = 'page-custom-js';
+        const removeScript = () => {
+          const existingScript = document.getElementById(jsId);
+          if (existingScript) existingScript.remove();
+        };
+
+        removeScript();
+        const pageJS = data.data && data.data.customJavaScript ? data.data.customJavaScript : '';
+        if (pageJS && pageJS.trim()) {
+          try {
+            const scriptTag = document.createElement('script');
+            scriptTag.id = jsId;
+            scriptTag.type = 'text/javascript';
+            // Avoid using src or eval; set textContent to inline JS
+            scriptTag.textContent = pageJS;
+            // Append at end of body so it runs after DOM
+            document.body.appendChild(scriptTag);
+          } catch (err) {
+            console.error('Failed to inject page customJavaScript', err);
+            removeScript();
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load page customCSS', err);
+        removeStyle();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname]);
 
   const showLoginForm = () => {
     console.log('Opening login modal');

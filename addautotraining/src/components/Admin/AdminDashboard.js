@@ -17,6 +17,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [editorMounted, setEditorMounted] = useState(false);
   const navigate = useNavigate();
 
   // Memoized API call function
@@ -58,8 +59,13 @@ const AdminDashboard = () => {
     }
 
     setUserRole(user.role);
+    console.log('[AdminDashboard] userRole set to', user.role);
     fetchDashboardStats();
   }, [fetchDashboardStats, navigate]);
+
+  useEffect(() => {
+    console.log('[AdminDashboard] activeTab changed:', activeTab);
+  }, [activeTab]);
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('token');
@@ -267,10 +273,44 @@ const AdminDashboard = () => {
             {activeTab === 'courses' && <CourseManager />}
             {activeTab === 'videos' && <VideoManager />}
             {activeTab === 'analytics' && <Analytics />}
-            {activeTab === 'editor' && <WebsiteEditor userRole={userRole} />}
+            {activeTab === 'editor' && (
+              <WebsiteEditor userRole={userRole} onMount={() => setEditorMounted(true)} />
+            )}
           </Suspense>
         )}
       </main>
+
+      {/* Debug overlay (temporary) */}
+      <div style={{position: 'fixed', right: 12, bottom: 12, background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '8px 10px', borderRadius: 6, zIndex: 9999, fontSize: 12}}>
+        <div style={{fontWeight: 600, marginBottom: 4}}>Debug</div>
+        <div>role: {userRole || 'n/a'}</div>
+        <div>tab: {activeTab}</div>
+        <div>editorMounted: {String(editorMounted)}</div>
+      </div>
+
+      {/* Quick switch button */}
+      <button
+        onClick={() => {
+          setActiveTab('editor');
+          setEditorMounted(false);
+        }}
+        style={{
+          position: 'fixed',
+          right: 12,
+          bottom: 140,
+          padding: '10px 15px',
+          background: '#667eea',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 6,
+          cursor: 'pointer',
+          fontSize: 12,
+          fontWeight: 600,
+          zIndex: 9999
+        }}
+      >
+        Go to Editor
+      </button>
     </div>
   );
 };

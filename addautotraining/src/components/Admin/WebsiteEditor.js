@@ -14,7 +14,7 @@ const PublishToggle = ({ isPublished, onChange }) => (
   </div>
 );
 
-const WebsiteEditor = ({ userRole }) => {
+const WebsiteEditor = ({ userRole, onMount }) => {
   const [pages, setPages] = useState([]);
   const [selectedPage, setSelectedPage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -57,18 +57,24 @@ const WebsiteEditor = ({ userRole }) => {
 
   // Fetch pages on mount
   useEffect(() => {
-    if (userRole === 'super_admin') {
+    console.log('[WebsiteEditor] checking userRole=', userRole);
+    // Notify parent that editor rendered (helpful for debugging)
+    if (typeof onMount === 'function') {
+      try { onMount(); } catch (e) { /* noop */ }
+    }
+    // Allow both 'admin' and 'super_admin' to load pages.
+    if (userRole === 'super_admin' || userRole === 'admin') {
       fetchPages();
     }
-  }, [userRole]);
+  }, [userRole, onMount]);
 
-  // Check authorization
-  if (userRole !== 'super_admin') {
+  // Check authorization - allow admin and super_admin
+  if (userRole !== 'super_admin' && userRole !== 'admin') {
     return (
       <div className="editor-container">
         <div className="error-box">
           <h2>Access Denied</h2>
-          <p>Only super admins can access the website editor.</p>
+          <p>Only admin or super admin users can access the website editor.</p>
         </div>
       </div>
     );
@@ -165,6 +171,46 @@ const WebsiteEditor = ({ userRole }) => {
     }
   };
 
+  const handlePublishNow = async () => {
+    if (!selectedPage && !isCreating) return;
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      let id = selectedPage ? selectedPage._id : null;
+      // If creating, persist first and get id
+      if (isCreating && !id) {
+        const createResp = await axios.post('/api/website/editor/pages', formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        // prepend to pages list
+        setPages(prev => [createResp.data.data, ...prev]);
+        id = createResp.data.data._id;
+        setSelectedPage(createResp.data.data);
+        setIsCreating(false);
+        setIsEditing(true);
+      }
+
+      if (!id) {
+        setError('Could not publish: missing page id');
+        return;
+      }
+
+      const resp = await axios.put(`/api/website/editor/pages/${id}/publish`, { isPublished: true }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Update local state
+      setPages(pages.map(p => p._id === resp.data.data._id ? resp.data.data : p));
+      setSelectedPage(resp.data.data);
+      setSuccess('Page published successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to publish page');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this page?')) return;
     
@@ -192,6 +238,7 @@ const WebsiteEditor = ({ userRole }) => {
       <div className="editor-main-header">
         <h1>🌐 Website Editor</h1>
         <p className="editor-subtitle">For Super Admins Only - Edit website pages and content</p>
+        <p className="editor-guidance">Tip: use <strong>Preview</strong> to check styling, then click <strong>Publish Now</strong> to make changes live.</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
@@ -247,6 +294,9 @@ const WebsiteEditor = ({ userRole }) => {
                   </button>
                   <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
                     {loading ? 'Saving...' : 'Save'}
+                  </button>
+                  <button className="btn btn-success" onClick={handlePublishNow} disabled={loading} title="Save & publish immediately">
+                    {loading ? 'Publishing...' : 'Publish Now'}
                   </button>
                 </div>
               </div>

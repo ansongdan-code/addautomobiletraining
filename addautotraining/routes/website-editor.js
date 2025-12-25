@@ -36,11 +36,39 @@ router.get('/pages', async (req, res) => {
 });
 
 // Get single page by slug (public)
-router.get('/pages/:slug', async (req, res) => {
+// Get single page by slug (public). If ?preview=true is set, require auth and allow admins to see drafts.
+router.get('/pages/:slug', async (req, res, next) => {
   try {
-    const page = await WebPage.findOne({ slug: req.params.slug })
+    const { preview } = req.query;
+
+    // If preview requested, enforce auth token and allow admin or super_admin
+    if (preview === 'true') {
+      // Delegate to protect middleware to populate req.user
+      return protect(req, res, async () => {
+        try {
+          const page = await WebPage.findOne({ slug: req.params.slug })
+            .populate('author', 'name email');
+
+          if (!page) {
+            return res.status(404).json({ success: false, error: 'Page not found' });
+          }
+
+          if (!page.isPublished && !(req.user.role === 'super_admin' || req.user.role === 'admin')) {
+            return res.status(403).json({ success: false, error: 'Not allowed to preview this page' });
+          }
+
+          return res.json({ success: true, data: page });
+        } catch (err) {
+          console.error('Error fetching page (preview):', err);
+          return res.status(500).json({ success: false, error: 'Server error' });
+        }
+      });
+    }
+
+    // Public fetch - only return published pages
+    const page = await WebPage.findOne({ slug: req.params.slug, isPublished: true })
       .populate('author', 'name email');
-    
+
     if (!page) {
       return res.status(404).json({
         success: false,
@@ -115,6 +143,8 @@ router.post('/editor/pages', [protect, isSuperAdmin], async (req, res) => {
       seoKeywords: seoKeywords || [],
       author: req.user.id
     });
+    // Auto-publish by default unless explicitly set to false
+    newPage.isPublished = req.body.isPublished !== undefined ? !!req.body.isPublished : true;
 
     await newPage.save();
 
@@ -159,7 +189,8 @@ router.put('/editor/pages/:id', [protect, isSuperAdmin], async (req, res) => {
     page.slug = slug ? slug.toLowerCase().trim() : page.slug;
     page.content = content || page.content;
     page.description = description || page.description;
-    page.isPublished = isPublished !== undefined ? isPublished : page.isPublished;
+    // Auto-publish on save if not explicitly provided
+    page.isPublished = isPublished !== undefined ? !!isPublished : true;
     page.customCSS = customCSS !== undefined ? customCSS : page.customCSS;
     page.customJavaScript = customJavaScript !== undefined ? customJavaScript : page.customJavaScript;
     page.seoTitle = seoTitle || page.seoTitle;
