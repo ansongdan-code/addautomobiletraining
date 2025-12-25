@@ -267,6 +267,7 @@ const AdminDashboard = () => {
               <Route path="/courses" element={<CourseManager />} />
               <Route path="/videos" element={<VideoManager />} />
               <Route path="/analytics" element={<Analytics />} />
+              <Route path="/editor" element={<WebsiteEditor userRole={userRole} />} />
             </Routes>
             
             {/* Render components based on active tab */}
@@ -276,7 +277,7 @@ const AdminDashboard = () => {
             {activeTab === 'courses' && <CourseManager />}
             {activeTab === 'videos' && <VideoManager />}
             {activeTab === 'analytics' && <Analytics />}
-            {activeTab === 'editor' && userRole && <WebsiteEditor userRole={userRole} />}
+            {activeTab === 'editor' && <WebsiteEditor userRole={userRole} />}
           </Suspense>
         )}
       </main>
