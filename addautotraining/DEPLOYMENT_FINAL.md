@@ -57,8 +57,15 @@ Created comprehensive CSS styling file with:
 - **Browser:** Chrome, Firefox, Safari, or Edge recommended
 
 ### 2. Login Credentials
-- **Email:** admin@example.com
-- **Password:** Admin@123456
+
+**Admin User (Dashboard Access):**
+- **Email:** admin@test.com
+- **Password:** admin123
+- **Role:** admin
+
+**Super Admin User (Full Access + Website Editor):**
+- **Email:** superadmin@test.com
+- **Password:** superadmin123
 - **Role:** super_admin (full access including Website Editor)
 
 ### 3. Access Website Editor
