@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { showNotification } from '../../App';
 import './AdminDashboard.css';
 
@@ -260,16 +260,6 @@ const AdminDashboard = () => {
 
         {activeTab !== 'dashboard' && (
           <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path="/settings" element={<WebsiteSettings />} />
-              <Route path="/blog" element={<BlogManager />} />
-              <Route path="/users" element={<UserManager />} />
-              <Route path="/courses" element={<CourseManager />} />
-              <Route path="/videos" element={<VideoManager />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/editor" element={<WebsiteEditor userRole={userRole} />} />
-            </Routes>
-            
             {/* Render components based on active tab */}
             {activeTab === 'settings' && <WebsiteSettings />}
             {activeTab === 'blog' && <BlogManager />}
