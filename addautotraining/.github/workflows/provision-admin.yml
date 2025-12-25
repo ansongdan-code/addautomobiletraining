@@ -1,0 +1,41 @@
+name: Provision Admin Users
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  provision-admin:
+    name: Provision Admin Users
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Check MONGO_URI secret
+        id: check
+        run: |
+          if [ -z "${{ secrets.MONGO_URI }}" ]; then
+            echo "MONGO_URI secret not provided; skipping admin provisioning.";
+            echo "skip=true" >> $GITHUB_OUTPUT;
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT;
+          fi
+
+      - name: Provision admin users
+        if: steps.check.outputs.skip == 'false'
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          node scripts/create-admin.js

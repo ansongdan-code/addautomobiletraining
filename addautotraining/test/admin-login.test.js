@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 
 // Mock express app setup
 const express = require('express');
@@ -25,10 +26,18 @@ describe('Admin Login Test Suite', () => {
   let regularUser;
   let adminToken;
   let regularToken;
+  let mongod;
+  let mongoUri;
 
   beforeAll(async () => {
-    // Connect to test database
-    await mongoose.connect(MONGO_URI);
+    // Start in-memory MongoDB and connect for tests
+    mongod = await MongoMemoryServer.create();
+    const uri = mongod.getUri();
+    mongoUri = uri;
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
 
     // Clear test data
     await User.deleteMany({});
@@ -75,6 +84,7 @@ describe('Admin Login Test Suite', () => {
 
   afterAll(async () => {
     await mongoose.connection.close();
+    if (mongod) await mongod.stop();
   });
 
   describe('Admin Authentication Tests', () => {
@@ -352,7 +362,7 @@ describe('Admin Login Test Suite', () => {
       expect(response.body).toHaveProperty('error');
 
       // Reconnect for other tests
-      await mongoose.connect(MONGO_URI);
+      await mongoose.connect(mongoUri || MONGO_URI);
     });
   });
 });

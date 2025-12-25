@@ -5,6 +5,7 @@ const WebPage = require('../models/WebPage');
 
 // Middleware to ensure only super_admin can edit website
 const isSuperAdmin = (req, res, next) => {
+  console.log('[SuperAdmin Check] User role:', req.user?.role, 'Check result:', req.user?.role === 'super_admin');
   if (req.user.role !== 'super_admin') {
     return res.status(403).json({
       success: false,

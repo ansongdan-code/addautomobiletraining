@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: addauto_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: strongpassword
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.prod
+    container_name: addauto_backend
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    container_name: addauto_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  mongo_data:
+labels:
+  - "traefik.enable=true"
+  - "
+  traefik.http.routers.frontend.rule=Host(`yourdomain.com`)"
+  - "traefik.http.routers.frontend.tls=true"

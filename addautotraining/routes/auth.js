@@ -24,25 +24,13 @@ async (req, res) => {
     let user = await User.findOne({ email });
 
     if (user) {
-      return res.status(400).json({msg: 'User already exists'});
+      return res.status(400).json({ msg: 'User already exists' });
     }
 
-    user = new User({
-      name,
-      email,
-      password
-    });
+    user = new User({ name, email, password });
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-
+    // Password hashing is handled in the User model pre-save hook.
     await user.save();
-
-    const payload = {
-      user: {
-        id: user.id
-      }
-    };
 
     const token = generateToken(user.id);
 
@@ -66,14 +54,20 @@ async (req, res) => {
 
   const { email, password } = req.body;
 
+  console.log('Login request body:', { email, passwordLength: password ? password.length : 0 });
+
   try {
     const user = await User.findOne({ email }).select('+password');
+
+    console.log('User from DB for login:', user ? { email: user.email, hasPassword: !!user.password, passwordPrefix: String(user.password).slice(0, 10) } : null);
 
     if (!user) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
+
+    console.log('Password compare result:', { email, isMatch });
 
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
@@ -97,10 +91,21 @@ async (req, res) => {
 router.get('/me', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user
+    });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 });
 

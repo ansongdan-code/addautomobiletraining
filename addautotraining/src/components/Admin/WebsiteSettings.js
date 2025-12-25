@@ -49,6 +49,13 @@ const WebsiteSettings = () => {
         publicKey: '',
         secretKey: ''
       }
+    },
+    theme: {
+      fontFamily: 'Arial, sans-serif',
+      primaryColor: '#2196F3',
+      secondaryColor: '#FFC107',
+      backgroundColor: '#FFFFFF',
+      textColor: '#333333'
     }
   });
 
@@ -521,6 +528,62 @@ const WebsiteSettings = () => {
     </div>
   );
 
+  const renderThemeSettings = () => (
+    <div className="settings-section">
+      <h3>Theme & UI Settings</h3>
+      <div className="form-group">
+        <label htmlFor="fontFamily">Font Family</label>
+        <input
+          type="text"
+          id="fontFamily"
+          value={settings.theme.fontFamily}
+          onChange={(e) => handleInputChange('theme', 'fontFamily', e.target.value)}
+          placeholder="e.g., Arial, sans-serif"
+        />
+      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label htmlFor="themePrimaryColor">Primary Color</label>
+          <input
+            type="color"
+            id="themePrimaryColor"
+            value={settings.theme.primaryColor}
+            onChange={(e) => handleInputChange('theme', 'primaryColor', e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="themeSecondaryColor">Secondary Color</label>
+          <input
+            type="color"
+            id="themeSecondaryColor"
+            value={settings.theme.secondaryColor}
+            onChange={(e) => handleInputChange('theme', 'secondaryColor', e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label htmlFor="backgroundColor">Background Color</label>
+          <input
+            type="color"
+            id="backgroundColor"
+            value={settings.theme.backgroundColor}
+            onChange={(e) => handleInputChange('theme', 'backgroundColor', e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="textColor">Text Color</label>
+          <input
+            type="color"
+            id="textColor"
+            value={settings.theme.textColor}
+            onChange={(e) => handleInputChange('theme', 'textColor', e.target.value)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="loading-spinner">
@@ -575,6 +638,12 @@ const WebsiteSettings = () => {
           >
             Payment
           </button>
+          <button
+            className={`nav-item ${activeSection === 'theme' ? 'active' : ''}`}
+            onClick={() => setActiveSection('theme')}
+          >
+            Theme & UI
+          </button>
         </nav>
 
         <form onSubmit={handleSubmit} className="settings-form">
@@ -584,6 +653,7 @@ const WebsiteSettings = () => {
           {activeSection === 'hero' && renderHeroSettings()}
           {activeSection === 'seo' && renderSEOSettings()}
           {activeSection === 'payment' && renderPaymentSettings()}
+          {activeSection === 'theme' && renderThemeSettings()}
 
           <div className="form-actions">
             <button

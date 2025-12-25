@@ -31,6 +31,9 @@ const websiteEditorRoutes = require('./routes/website-editor');
 
 const app = express();
 
+// Trust proxy for accurate IP addresses when behind a load balancer/reverse proxy
+app.set('trust proxy', 1);
+
 // Security and performance middleware
 const helmet = require('helmet');
 const morgan = require('morgan');

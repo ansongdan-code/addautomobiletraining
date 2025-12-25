@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Use env values with safe development defaults
+const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';
+const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
+
 // Protect routes
 exports.protect = async (req, res, next) => {
   let token;
@@ -17,8 +21,10 @@ exports.protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password');
+    
+    console.log('[Auth Debug] User found:', { email: user?.email, role: user?.role });
     
     if (!user) {
       return res.status(401).json({
@@ -35,6 +41,7 @@ exports.protect = async (req, res, next) => {
     }
 
     req.user = user;
+    console.log('[Auth Debug] Setting req.user with role:', req.user.role);
     next();
   } catch (error) {
     console.error('Token verification error:', error);
@@ -82,7 +89,15 @@ exports.isInstructor = (req, res, next) => {
 
 // Generate JWT token
 exports.generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE
+  if (!process.env.JWT_SECRET) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET is not set in environment');
+    } else {
+      console.warn('Warning: using default JWT secret for development/testing');
+    }
+  }
+
+  return jwt.sign({ id }, JWT_SECRET, {
+    expiresIn: JWT_EXPIRE
   });
 };

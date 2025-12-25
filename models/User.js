@@ -25,8 +25,38 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['student', 'admin'],
+        enum: ['student', 'instructor', 'admin', 'super_admin'],
         default: 'student'
+    },
+    permissions: {
+        manageCourses: {
+            type: Boolean,
+            default: false
+        },
+        manageUsers: {
+            type: Boolean,
+            default: false
+        },
+        manageContent: {
+            type: Boolean,
+            default: false
+        },
+        viewAnalytics: {
+            type: Boolean,
+            default: false
+        },
+        managePayments: {
+            type: Boolean,
+            default: false
+        }
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    lastLogin: {
+        type: Date,
+        default: Date.now
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
@@ -55,6 +85,18 @@ userSchema.methods.getSignedJwtToken = function() {
 // Match user entered password to hashed password in database
 userSchema.methods.matchPassword = async function(enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Check if user has specific permission
+userSchema.methods.hasPermission = function(permission) {
+    if (this.role === 'super_admin') return true;
+    if (this.role === 'admin') return this.permissions[permission] || false;
+    return false;
+};
+
+// Check if user is admin
+userSchema.methods.isAdmin = function() {
+    return this.role === 'admin' || this.role === 'super_admin';
 };
 
 module.exports = mongoose.model('User', userSchema);

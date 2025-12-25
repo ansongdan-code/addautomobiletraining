@@ -16,6 +16,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   const navigate = useNavigate();
 
   // Memoized API call function
@@ -58,6 +59,7 @@ const AdminDashboard = () => {
       return;
     }
 
+    setUserRole(user.role);
     fetchDashboardStats();
   }, [fetchDashboardStats, navigate]);
 
@@ -276,7 +278,7 @@ const AdminDashboard = () => {
             {activeTab === 'courses' && <CourseManager />}
             {activeTab === 'videos' && <VideoManager />}
             {activeTab === 'analytics' && <Analytics />}
-            {activeTab === 'editor' && <WebsiteEditor userRole={JSON.parse(localStorage.getItem('user'))?.role} />}
+            {activeTab === 'editor' && userRole && <WebsiteEditor userRole={userRole} />}
           </Suspense>
         )}
       </main>

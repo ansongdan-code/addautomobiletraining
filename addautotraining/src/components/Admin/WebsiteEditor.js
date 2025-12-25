@@ -2,6 +2,18 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './WebsiteEditor.css';
 
+const PublishToggle = ({ isPublished, onChange }) => (
+  <div className="publish-toggle">
+    <span className={`status ${isPublished ? 'published' : 'draft'}`}>
+      {isPublished ? 'Published' : 'Draft'}
+    </span>
+    <label className="switch">
+      <input type="checkbox" checked={isPublished} onChange={onChange} />
+      <span className="slider round"></span>
+    </label>
+  </div>
+);
+
 const WebsiteEditor = ({ userRole }) => {
   const [pages, setPages] = useState([]);
   const [selectedPage, setSelectedPage] = useState(null);
@@ -10,6 +22,7 @@ const WebsiteEditor = ({ userRole }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [preview, setPreview] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -24,23 +37,7 @@ const WebsiteEditor = ({ userRole }) => {
     seoKeywords: []
   });
 
-  // Fetch pages on mount
-  useEffect(() => {
-    fetchPages();
-  }, []);
-
-  // Check authorization
-  if (userRole !== 'super_admin') {
-    return (
-      <div className="editor-container">
-        <div className="error-box">
-          <h2>Access Denied</h2>
-          <p>Only super admins can access the website editor.</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Fetch pages function
   const fetchPages = async () => {
     try {
       setLoading(true);
@@ -58,6 +55,25 @@ const WebsiteEditor = ({ userRole }) => {
     }
   };
 
+  // Fetch pages on mount
+  useEffect(() => {
+    if (userRole === 'super_admin') {
+      fetchPages();
+    }
+  }, [userRole]);
+
+  // Check authorization
+  if (userRole !== 'super_admin') {
+    return (
+      <div className="editor-container">
+        <div className="error-box">
+          <h2>Access Denied</h2>
+          <p>Only super admins can access the website editor.</p>
+        </div>
+      </div>
+    );
+  }
+
   const handlePageSelect = (page) => {
     setSelectedPage(page);
     setFormData({
@@ -74,6 +90,7 @@ const WebsiteEditor = ({ userRole }) => {
     });
     setIsEditing(true);
     setIsCreating(false);
+    setPreview(false);
     setError('');
     setSuccess('');
   };
@@ -94,6 +111,7 @@ const WebsiteEditor = ({ userRole }) => {
     });
     setIsCreating(true);
     setIsEditing(false);
+    setPreview(false);
   };
 
   const handleInputChange = (e) => {
@@ -113,6 +131,10 @@ const WebsiteEditor = ({ userRole }) => {
     }
   };
 
+  const handlePublishToggle = () => {
+    setFormData(prev => ({ ...prev, isPublished: !prev.isPublished }));
+  };
+  
   const handleSave = async () => {
     try {
       setLoading(true);
@@ -167,8 +189,10 @@ const WebsiteEditor = ({ userRole }) => {
 
   return (
     <div className="website-editor-container">
-      <h1>🌐 Website Editor</h1>
-      <p className="editor-subtitle">For Super Admins Only - Edit website pages and content</p>
+      <div className="editor-main-header">
+        <h1>🌐 Website Editor</h1>
+        <p className="editor-subtitle">For Super Admins Only - Edit website pages and content</p>
+      </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
@@ -216,175 +240,86 @@ const WebsiteEditor = ({ userRole }) => {
             <>
               <div className="editor-header">
                 <h2>{isCreating ? 'Create New Page' : 'Edit Page'}</h2>
-                <button className="btn btn-secondary" onClick={() => {
-                  setIsEditing(false);
-                  setIsCreating(false);
-                  setSelectedPage(null);
-                }}>
-                  ← Back
-                </button>
+                <div className="editor-header-actions">
+                  <PublishToggle isPublished={formData.isPublished} onChange={handlePublishToggle} />
+                  <button className="btn btn-secondary" onClick={() => setPreview(!preview)}>
+                    {preview ? 'Edit' : 'Preview'}
+                  </button>
+                  <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
+                    {loading ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
               </div>
 
-              <form className="editor-form">
-                {/* Basic Info */}
-                <div className="form-section">
-                  <h3>Basic Information</h3>
-                  <div className="form-group">
-                    <label>Page Title *</label>
-                    <input
-                      type="text"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      placeholder="e.g., Home, About Us, Services"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Page Slug *</label>
-                    <input
-                      type="text"
-                      name="slug"
-                      value={formData.slug}
-                      onChange={handleInputChange}
-                      placeholder="e.g., home, about-us, services"
-                      required
-                    />
-                    <small>URL-friendly unique identifier</small>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Description</label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      placeholder="Brief page description"
-                      rows="2"
-                    />
-                  </div>
+              {preview ? (
+                <div className="preview-panel">
+                  <iframe
+                    srcDoc={`
+                      <html>
+                        <head>
+                          <style>${formData.customCSS}</style>
+                        </head>
+                        <body>
+                          ${formData.content}
+                          <script>${formData.customJavaScript}</script>
+                        </body>
+                      </html>
+                    `}
+                    title="Page Preview"
+                    sandbox="allow-scripts"
+                  />
                 </div>
-
-                {/* Content */}
-                <div className="form-section">
-                  <h3>Page Content</h3>
-                  <div className="form-group">
-                    <label>Content *</label>
-                    <textarea
-                      name="content"
-                      value={formData.content}
-                      onChange={handleInputChange}
-                      placeholder="Enter HTML or plain text content"
-                      rows="12"
-                      className="content-editor"
-                      required
-                    />
-                    <small>Supports HTML markup</small>
+              ) : (
+                <form className="editor-form">
+                  <div className="form-grid">
+                    <div className="form-section main-content">
+                      <div className="form-group">
+                        <label>Title</label>
+                        <input type="text" name="title" value={formData.title} onChange={handleInputChange} />
+                      </div>
+                      <div className="form-group">
+                        <label>Content</label>
+                        <textarea name="content" value={formData.content} onChange={handleInputChange} rows="20" />
+                      </div>
+                    </div>
+                    <div className="form-section side-content">
+                      <div className="form-group">
+                        <label>Slug</label>
+                        <input type="text" name="slug" value={formData.slug} onChange={handleInputChange} />
+                      </div>
+                      <div className="form-group">
+                        <label>Description</label>
+                        <textarea name="description" value={formData.description} onChange={handleInputChange} rows="4" />
+                      </div>
+                      <div className="form-group">
+                        <label>SEO Title</label>
+                        <input type="text" name="seoTitle" value={formData.seoTitle} onChange={handleInputChange} />
+                      </div>
+                      <div className="form-group">
+                        <label>SEO Description</label>
+                        <textarea name="seoDescription" value={formData.seoDescription} onChange={handleInputChange} rows="3" />
+                      </div>
+                      <div className="form-group">
+                        <label>SEO Keywords</label>
+                        <input type="text" name="seoKeywords" value={Array.isArray(formData.seoKeywords) ? formData.seoKeywords.join(', ') : ''} onChange={handleInputChange} />
+                      </div>
+                      <div className="form-group">
+                        <label>Custom CSS</label>
+                        <textarea name="customCSS" value={formData.customCSS} onChange={handleInputChange} rows="5" />
+                      </div>
+                      <div className="form-group">
+                        <label>Custom JavaScript</label>
+                        <textarea name="customJavaScript" value={formData.customJavaScript} onChange={handleInputChange} rows="5" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                {/* SEO */}
-                <div className="form-section">
-                  <h3>SEO Settings</h3>
-                  <div className="form-group">
-                    <label>SEO Title</label>
-                    <input
-                      type="text"
-                      name="seoTitle"
-                      value={formData.seoTitle}
-                      onChange={handleInputChange}
-                      placeholder="Page title for search engines"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>SEO Description</label>
-                    <textarea
-                      name="seoDescription"
-                      value={formData.seoDescription}
-                      onChange={handleInputChange}
-                      placeholder="Meta description for search engines"
-                      rows="3"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>SEO Keywords</label>
-                    <input
-                      type="text"
-                      name="seoKeywords"
-                      value={Array.isArray(formData.seoKeywords) ? formData.seoKeywords.join(', ') : ''}
-                      onChange={handleInputChange}
-                      placeholder="Comma-separated keywords"
-                    />
-                    <small>Separate keywords with commas</small>
-                  </div>
-                </div>
-
-                {/* Advanced */}
-                <div className="form-section">
-                  <h3>Advanced</h3>
-                  <div className="form-group">
-                    <label>Custom CSS</label>
-                    <textarea
-                      name="customCSS"
-                      value={formData.customCSS}
-                      onChange={handleInputChange}
-                      placeholder="Add custom CSS for this page"
-                      rows="4"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Custom JavaScript</label>
-                    <textarea
-                      name="customJavaScript"
-                      value={formData.customJavaScript}
-                      onChange={handleInputChange}
-                      placeholder="Add custom JavaScript for this page"
-                      rows="4"
-                    />
-                  </div>
-                </div>
-
-                {/* Status */}
-                <div className="form-section">
-                  <h3>Status</h3>
-                  <div className="form-group checkbox">
-                    <input
-                      type="checkbox"
-                      name="isPublished"
-                      id="isPublished"
-                      checked={formData.isPublished}
-                      onChange={handleInputChange}
-                    />
-                    <label htmlFor="isPublished">Publish this page</label>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleSave}
-                    disabled={loading || !formData.title || !formData.slug || !formData.content}
-                  >
-                    {loading ? 'Saving...' : 'Save Page'}
-                  </button>
-                  {selectedPage && (
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={handleDelete}
-                      disabled={loading}
-                    >
+                  <div className="form-actions">
+                    <button type="button" className="btn btn-danger" onClick={handleDelete} disabled={loading || !selectedPage}>
                       Delete Page
                     </button>
-                  )}
-                </div>
-              </form>
+                  </div>
+                </form>
+              )}
             </>
           ) : (
             <div className="empty-editor">
