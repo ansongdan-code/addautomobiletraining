@@ -94,7 +94,7 @@ connectDB();
 // Rate limiting with different limits for different endpoints
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000,
+  max: 5000, // Increased from 1000 to prevent admin dashboard from being blocked
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
