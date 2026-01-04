@@ -298,6 +298,9 @@ const WebsiteEditor = ({ userRole, onMount }) => {
                   <button className="btn btn-success" onClick={handlePublishNow} disabled={loading} title="Save & publish immediately">
                     {loading ? 'Publishing...' : 'Publish Now'}
                   </button>
+                  <button className="btn btn-danger" onClick={handleDelete} disabled={loading || !selectedPage} title="Delete this page">
+                    Delete
+                  </button>
                 </div>
               </div>
 
@@ -362,11 +365,6 @@ const WebsiteEditor = ({ userRole, onMount }) => {
                         <textarea name="customJavaScript" value={formData.customJavaScript} onChange={handleInputChange} rows="5" />
                       </div>
                     </div>
-                  </div>
-                  <div className="form-actions">
-                    <button type="button" className="btn btn-danger" onClick={handleDelete} disabled={loading || !selectedPage}>
-                      Delete Page
-                    </button>
                   </div>
                 </form>
               )}
