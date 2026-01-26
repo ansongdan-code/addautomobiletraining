@@ -28,6 +28,7 @@ const adminRoutes = require('./routes/admin');
 const blogRoutes = require('./routes/blog');
 const paymentRoutes = require('./routes/payment');
 const websiteEditorRoutes = require('./routes/website-editor');
+const appEditorRoutes = require('./routes/app-editor');
 
 const app = express();
 
@@ -58,7 +59,21 @@ app.use(helmet({
       frameSrc: ["'self'", "https:"],
     },
   },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
+
+// Additional security headers
+app.use((req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.removeHeader('X-Powered-By');
+  next();
+});
 
 // CORS configuration
 app.use(cors({
@@ -76,6 +91,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // MongoDB connection with optimizations and retry logic
 const connectDB = async () => {
   try {
+    console.log('MONGO_URI:', process.env.MONGO_URI);
     await mongoose.connect(process.env.MONGO_URI, {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 10000,
@@ -136,6 +152,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/website', websiteEditorRoutes);
+app.use('/api/editor', appEditorRoutes);
 
 // PayPal integration (legacy)
 const clientId = process.env.PAYPAL_CLIENT_ID;

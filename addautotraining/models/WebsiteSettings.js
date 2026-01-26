@@ -210,6 +210,13 @@ const websiteSettingsSchema = new mongoose.Schema({
       listId: String
     }
   },
+  theme: {
+    fontFamily: { type: String, default: 'Arial, sans-serif' },
+    primaryColor: { type: String, default: '#2196F3' },
+    secondaryColor: { type: String, default: '#FFC107' },
+    backgroundColor: { type: String, default: '#FFFFFF' },
+    textColor: { type: String, default: '#333333' }
+  },
   customCSS: {
     type: String,
     default: ''

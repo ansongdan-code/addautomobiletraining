@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import axios from 'axios';
-import WebsiteEditor from '../src/components/Admin/WebsiteEditor';
+import WebsiteEditor from './WebsiteEditor';
 
 // Mock axios
 jest.mock('axios');
@@ -97,7 +97,7 @@ describe('WebsiteEditor', () => {
       fireEvent.click(screen.getByText('Home Page'));
     });
 
-    fireEvent.click(screen.getByText('Delete Page'));
+    fireEvent.click(screen.getByText('Delete'));
 
     await waitFor(() => {
       expect(axios.delete).toHaveBeenCalledWith('/api/website/editor/pages/1', expect.any(Object));
@@ -112,7 +112,7 @@ describe('WebsiteEditor', () => {
       fireEvent.click(screen.getByText('Home Page'));
     });
 
-    fireEvent.click(screen.getByText('Preview'));
+    fireEvent.click(screen.getByRole('button', { name: /preview/i }));
     expect(screen.getByTitle('Page Preview')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Edit'));

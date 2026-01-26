@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import WebsiteSettings from '../src/components/Admin/WebsiteSettings';
+import WebsiteSettings from './WebsiteSettings';
 
 // Mock the fetch function
 global.fetch = jest.fn();
 
 // Mock the showNotification function from App.js
-jest.mock('../src/App', () => ({
+jest.mock('../../App', () => ({
   showNotification: jest.fn(),
 }));
 
@@ -65,7 +65,7 @@ describe('WebsiteSettings Component', () => {
     localStorage.setItem('token', 'test-token');
     fetch.mockImplementation((url, options) => {
       if (url === '/api/admin/settings') {
-        if (!options || options.method === 'GET') {
+        if (!options || options.method === 'GET' || options.method === undefined) {
           return Promise.resolve({
             ok: true,
             json: () => Promise.resolve({ data: mockSettings }),
@@ -119,7 +119,7 @@ describe('WebsiteSettings Component', () => {
   });
 
   test('submits updated settings', async () => {
-    const { showNotification } = require('../src/App');
+    const { showNotification } = require('../../App');
     render(<WebsiteSettings />);
     
     await waitFor(() => {

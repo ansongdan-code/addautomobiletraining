@@ -168,8 +168,8 @@ const WebsiteSettings = () => {
         <input
           type="text"
           id="siteName"
-          value={settings.siteName}
-          onChange={(e) => setSettings(prev => ({ ...prev, siteName: e.target.value }))}
+          value={settings.siteName || ''}
+          onChange={(e) => setSettings(prev => ({...prev, siteName: e.target.value}))}
           placeholder="Enter site name"
           required
         />
@@ -179,8 +179,8 @@ const WebsiteSettings = () => {
         <label htmlFor="siteDescription">Site Description</label>
         <textarea
           id="siteDescription"
-          value={settings.siteDescription}
-          onChange={(e) => setSettings(prev => ({ ...prev, siteDescription: e.target.value }))}
+          value={settings.siteDescription || ''}
+          onChange={(e) => setSettings(prev => ({...prev, siteDescription: e.target.value}))}
           placeholder="Enter site description"
           rows="3"
         />
@@ -220,8 +220,8 @@ const WebsiteSettings = () => {
           <input
             type="color"
             id="primaryColor"
-            value={settings.primaryColor}
-            onChange={(e) => setSettings(prev => ({ ...prev, primaryColor: e.target.value }))}
+            value={settings.primaryColor || '#2196F3'}
+            onChange={(e) => setSettings(prev => ({...prev, primaryColor: e.target.value}))}
           />
         </div>
 
@@ -230,8 +230,8 @@ const WebsiteSettings = () => {
           <input
             type="color"
             id="secondaryColor"
-            value={settings.secondaryColor}
-            onChange={(e) => setSettings(prev => ({ ...prev, secondaryColor: e.target.value }))}
+            value={settings.secondaryColor || '#FFC107'}
+            onChange={(e) => setSettings(prev => ({...prev, secondaryColor: e.target.value}))}
           />
         </div>
       </div>

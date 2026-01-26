@@ -11,6 +11,7 @@ const CourseManager = lazy(() => import('./CourseManager'));
 const VideoManager = lazy(() => import('./VideoManager'));
 const Analytics = lazy(() => import('./Analytics'));
 const WebsiteEditor = lazy(() => import('./WebsiteEditor'));
+const VisualAppEditor = lazy(() => import('./VisualAppEditor'));
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -205,10 +206,10 @@ const AdminDashboard = () => {
             <button 
               onClick={() => setActiveTab('theme')}
               className="nav-link"
-              aria-label="Theme & UI"
+              aria-label="Visual Editor"
             >
               <i className="fas fa-palette"></i>
-              Theme & UI
+              Visual Editor
             </button>
           </li>
         </ul>
@@ -275,6 +276,9 @@ const AdminDashboard = () => {
             {activeTab === 'analytics' && <Analytics />}
             {activeTab === 'editor' && (
               <WebsiteEditor userRole={userRole} onMount={() => setEditorMounted(true)} />
+            )}
+            {activeTab === 'theme' && (
+              <VisualAppEditor userRole={userRole} onMount={() => setEditorMounted(true)} />
             )}
           </Suspense>
         )}

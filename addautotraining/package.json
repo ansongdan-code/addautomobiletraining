@@ -69,7 +69,7 @@
     "build": "react-scripts build",
     "build:prod": "cross-env NODE_ENV=production npm run build",
     "test": "react-scripts test",
-    "test:server": "jest",
+    "test:server": "jest --config jest.config.js",
     "test:all": "npm run test -- --watchAll=false && npm run test:server",
     "test:coverage": "jest --coverage && react-scripts test --coverage --watchAll=false",
     "test:watch": "jest --watch",
@@ -79,6 +79,11 @@
     "start:prod": "cross-env NODE_ENV=production node server.js",
     "dev": "concurrently \"npm start\" \"react-scripts start\"",
     "eject": "react-scripts eject"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "/node_modules/(?!axios)/"
+    ]
   },
   "eslintConfig": {
     "extends": [

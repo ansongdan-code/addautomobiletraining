@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, isAdmin } = require('../middleware/auth');
 const WebPage = require('../models/WebPage');
 
 // Middleware to ensure only super_admin can edit website
@@ -89,8 +89,8 @@ router.get('/pages/:slug', async (req, res, next) => {
   }
 });
 
-// Get all pages for editor (super admin only)
-router.get('/editor/pages', [protect, isSuperAdmin], async (req, res) => {
+// Get all pages for editor (admin or super admin)
+router.get('/editor/pages', [protect, isAdmin], async (req, res) => {
   try {
     const pages = await WebPage.find()
       .populate('author', 'name email')
@@ -109,8 +109,8 @@ router.get('/editor/pages', [protect, isSuperAdmin], async (req, res) => {
   }
 });
 
-// Create new page (super admin only)
-router.post('/editor/pages', [protect, isSuperAdmin], async (req, res) => {
+// Create new page (admin or super admin)
+router.post('/editor/pages', [protect, isAdmin], async (req, res) => {
   try {
     const { title, slug, content, description, customCSS, customJavaScript, seoTitle, seoDescription, seoKeywords } = req.body;
 
@@ -161,8 +161,8 @@ router.post('/editor/pages', [protect, isSuperAdmin], async (req, res) => {
   }
 });
 
-// Update page (super admin only)
-router.put('/editor/pages/:id', [protect, isSuperAdmin], async (req, res) => {
+// Update page (admin or super admin)
+router.put('/editor/pages/:id', [protect, isAdmin], async (req, res) => {
   try {
     const { title, slug, content, description, isPublished, customCSS, customJavaScript, seoTitle, seoDescription, seoKeywords, headerImage } = req.body;
 
@@ -213,8 +213,8 @@ router.put('/editor/pages/:id', [protect, isSuperAdmin], async (req, res) => {
   }
 });
 
-// Delete page (super admin only)
-router.delete('/editor/pages/:id', [protect, isSuperAdmin], async (req, res) => {
+// Delete page (admin or super admin)
+router.delete('/editor/pages/:id', [protect, isAdmin], async (req, res) => {
   try {
     const page = await WebPage.findByIdAndDelete(req.params.id);
     
@@ -238,8 +238,8 @@ router.delete('/editor/pages/:id', [protect, isSuperAdmin], async (req, res) => 
   }
 });
 
-// Publish/Unpublish page (super admin only)
-router.put('/editor/pages/:id/publish', [protect, isSuperAdmin], async (req, res) => {
+// Publish/Unpublish page (admin or super admin)
+router.put('/editor/pages/:id/publish', [protect, isAdmin], async (req, res) => {
   try {
     const { isPublished } = req.body;
     

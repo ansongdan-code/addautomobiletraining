@@ -69,7 +69,7 @@ const WebsiteEditor = ({ userRole, onMount }) => {
   }, [userRole, onMount]);
 
   // Check authorization - allow admin and super_admin
-  if (userRole !== 'super_admin' && userRole !== 'admin') {
+  if (userRole !== 'super_admin') {
     return (
       <div className="editor-container">
         <div className="error-box">
@@ -327,42 +327,42 @@ const WebsiteEditor = ({ userRole, onMount }) => {
                   <div className="form-grid">
                     <div className="form-section main-content">
                       <div className="form-group">
-                        <label>Title</label>
-                        <input type="text" name="title" value={formData.title} onChange={handleInputChange} />
+                        <label htmlFor="title">Title</label>
+                        <input id="title" type="text" name="title" value={formData.title} onChange={handleInputChange} />
                       </div>
                       <div className="form-group">
-                        <label>Content</label>
-                        <textarea name="content" value={formData.content} onChange={handleInputChange} rows="20" />
+                        <label htmlFor="content">Content</label>
+                        <textarea id="content" name="content" value={formData.content} onChange={handleInputChange} rows="20" />
                       </div>
                     </div>
                     <div className="form-section side-content">
                       <div className="form-group">
-                        <label>Slug</label>
-                        <input type="text" name="slug" value={formData.slug} onChange={handleInputChange} />
+                        <label htmlFor="slug">Slug</label>
+                        <input id="slug" type="text" name="slug" value={formData.slug} onChange={handleInputChange} />
                       </div>
                       <div className="form-group">
-                        <label>Description</label>
-                        <textarea name="description" value={formData.description} onChange={handleInputChange} rows="4" />
+                        <label htmlFor="description">Description</label>
+                        <textarea id="description" name="description" value={formData.description} onChange={handleInputChange} rows="4" />
                       </div>
                       <div className="form-group">
-                        <label>SEO Title</label>
-                        <input type="text" name="seoTitle" value={formData.seoTitle} onChange={handleInputChange} />
+                        <label htmlFor="seoTitle">SEO Title</label>
+                        <input id="seoTitle" type="text" name="seoTitle" value={formData.seoTitle} onChange={handleInputChange} />
                       </div>
                       <div className="form-group">
-                        <label>SEO Description</label>
-                        <textarea name="seoDescription" value={formData.seoDescription} onChange={handleInputChange} rows="3" />
+                        <label htmlFor="seoDescription">SEO Description</label>
+                        <textarea id="seoDescription" name="seoDescription" value={formData.seoDescription} onChange={handleInputChange} rows="3" />
                       </div>
                       <div className="form-group">
-                        <label>SEO Keywords</label>
-                        <input type="text" name="seoKeywords" value={Array.isArray(formData.seoKeywords) ? formData.seoKeywords.join(', ') : ''} onChange={handleInputChange} />
+                        <label htmlFor="seoKeywords">SEO Keywords</label>
+                        <input id="seoKeywords" type="text" name="seoKeywords" value={Array.isArray(formData.seoKeywords) ? formData.seoKeywords.join(', ') : ''} onChange={handleInputChange} />
                       </div>
                       <div className="form-group">
-                        <label>Custom CSS</label>
-                        <textarea name="customCSS" value={formData.customCSS} onChange={handleInputChange} rows="5" />
+                        <label htmlFor="customCSS">Custom CSS</label>
+                        <textarea id="customCSS" name="customCSS" value={formData.customCSS} onChange={handleInputChange} rows="5" />
                       </div>
                       <div className="form-group">
-                        <label>Custom JavaScript</label>
-                        <textarea name="customJavaScript" value={formData.customJavaScript} onChange={handleInputChange} rows="5" />
+                        <label htmlFor="customJavaScript">Custom JavaScript</label>
+                        <textarea id="customJavaScript" name="customJavaScript" value={formData.customJavaScript} onChange={handleInputChange} rows="5" />
                       </div>
                     </div>
                   </div>
