@@ -60,6 +60,11 @@ npm run start:prod            # Run production build with server
 docker-compose up             # Multi-container: MongoDB, backend, frontend (Nginx)
 ```
 
+### GitHub Workflows
+- **CI**: Runs on push/pull_request to main. Executes `npm run lint` and `npm run test:all` with MongoDB service.
+- **Provision Admin**: Runs on push to main if `MONGO_URI` secret is present.
+- **Issue Templates**: Standardized bug reports and feature requests.
+
 ## Project-Specific Patterns
 
 ### Error Handling & Responses

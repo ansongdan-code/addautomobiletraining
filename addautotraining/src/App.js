@@ -82,7 +82,7 @@ function App() {
     (async () => {
       try {
         const res = await fetch(`/api/website/pages/${slug}`);
-        if (!res.ok) {
+        if (!res || !res.ok) {
           removeStyle();
           return;
         }

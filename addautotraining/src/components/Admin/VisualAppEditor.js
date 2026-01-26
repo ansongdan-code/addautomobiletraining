@@ -69,12 +69,27 @@ const VisualAppEditor = ({ userRole, onMount }) => {
       const stylesRes = await axios.get('/api/editor/app/styles', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setStyleForm(stylesRes.data.data || {});
+      const fetchedStyles = stylesRes.data.data || {};
+      setStyleForm({
+        primaryColor: fetchedStyles.primaryColor || '#667eea',
+        secondaryColor: fetchedStyles.secondaryColor || '#764ba2',
+        accentColor: fetchedStyles.accentColor || '#f093fb',
+        fontFamily: fetchedStyles.fontFamily || 'Arial, sans-serif',
+        fontSize: fetchedStyles.fontSize || '16px',
+        borderRadius: fetchedStyles.borderRadius || '8px'
+      });
 
       setError('');
     } catch (err) {
       console.error('Failed to load app config:', err);
-      setError('Failed to load editor. Please try again.');
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to load editor. Please try again.';
+      setError(errorMsg);
+      // Log more details for debugging
+      if (err.response?.status === 401) {
+        setError('Authentication failed. Please login again.');
+      } else if (err.response?.status === 403) {
+        setError('Access denied. You do not have permission to access the editor.');
+      }
     } finally {
       setLoading(false);
     }
@@ -137,63 +152,121 @@ const VisualAppEditor = ({ userRole, onMount }) => {
     }
   };
 
-  const handleAddComponent = (pageId) => {
+  const handleAddComponent = async (pageId) => {
     if (!componentForm.type) {
       setError('Component type is required');
       return;
     }
 
-    const newComponent = {
-      ...componentForm,
-      id: `comp_${Date.now()}`
-    };
+    try {
+      setSaving(true);
+      const token = localStorage.getItem('token');
+      
+      const componentData = {
+        type: componentForm.type,
+        title: componentForm.title,
+        content: componentForm.content,
+        backgroundColor: componentForm.backgroundColor,
+        textColor: componentForm.textColor,
+        alignment: componentForm.alignment
+      };
 
-    setPages(pages.map(page => {
-      if (page._id === pageId) {
-        return {
-          ...page,
-          components: [...(page.components || []), newComponent]
-        };
+      await axios.post(`/api/editor/app/pages/${pageId}/components`, componentData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Refresh the page to get updated components
+      const updatedPages = await axios.get('/api/editor/app/pages', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPages(updatedPages.data.data || []);
+
+      // Update selected page if it's the one we just modified
+      if (selectedPage && selectedPage._id === pageId) {
+        const updatedPage = updatedPages.data.data.find(p => p._id === pageId);
+        if (updatedPage) setSelectedPage(updatedPage);
       }
-      return page;
-    }));
 
-    setComponentForm({
-      id: '',
-      type: 'section',
-      title: '',
-      content: '',
-      backgroundColor: '#ffffff',
-      textColor: '#000000',
-      alignment: 'center'
-    });
-    
-    setSuccess('Component added! Remember to save.');
+      setComponentForm({
+        id: '',
+        type: 'section',
+        title: '',
+        content: '',
+        backgroundColor: '#ffffff',
+        textColor: '#000000',
+        alignment: 'center'
+      });
+      
+      setSuccess('Component added successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to add component');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleRemoveComponent = (pageId, componentId) => {
-    setPages(pages.map(page => {
-      if (page._id === pageId) {
-        return {
-          ...page,
-          components: page.components.filter(c => c.id !== componentId)
-        };
+  const handleRemoveComponent = async (pageId, componentId) => {
+    if (!window.confirm('Are you sure you want to delete this component?')) return;
+
+    try {
+      setSaving(true);
+      const token = localStorage.getItem('token');
+      
+      await axios.delete(`/api/editor/app/pages/${pageId}/components/${componentId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Refresh the page to get updated components
+      const updatedPages = await axios.get('/api/editor/app/pages', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPages(updatedPages.data.data || []);
+
+      // Update selected page if it's the one we just modified
+      if (selectedPage && selectedPage._id === pageId) {
+        const updatedPage = updatedPages.data.data.find(p => p._id === pageId);
+        if (updatedPage) setSelectedPage(updatedPage);
       }
-      return page;
-    }));
+
+      setSuccess('Component deleted successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to delete component');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSaveStyles = async () => {
     try {
       setSaving(true);
+      setError('');
       const token = localStorage.getItem('token');
-      await axios.put('/api/editor/app/styles', styleForm, {
+      
+      if (!token) {
+        setError('Authentication required. Please login again.');
+        return;
+      }
+      
+      console.log('Saving styles:', styleForm);
+      const response = await axios.put('/api/editor/app/styles', styleForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSuccess('Styles updated successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      
+      if (response.data.success) {
+        setSuccess('Styles updated successfully!');
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(response.data.error || 'Failed to save styles');
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to save styles');
+      console.error('Error saving styles:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to save styles';
+      setError(errorMessage);
+      
+      // Clear error after 5 seconds
+      setTimeout(() => setError(''), 5000);
     } finally {
       setSaving(false);
     }
@@ -488,28 +561,31 @@ const VisualAppEditor = ({ userRole, onMount }) => {
                   {(selectedPage.components || []).length === 0 ? (
                     <p className="empty-state">No components yet. Add your first component!</p>
                   ) : (
-                    (selectedPage.components || []).map(comp => (
-                      <div key={comp.id} className="component-item">
-                        <div
-                          className="component-preview"
-                          style={{
-                            backgroundColor: comp.backgroundColor,
-                            color: comp.textColor,
-                            textAlign: comp.alignment
-                          }}
-                        >
-                          <h4>{comp.title}</h4>
-                          <p>{comp.content}</p>
-                          <span className="component-type">{comp.type}</span>
+                    (selectedPage.components || []).map((comp, idx) => {
+                      const compId = comp._id ? comp._id.toString() : (comp.id || `comp_${idx}`);
+                      return (
+                        <div key={compId} className="component-item">
+                          <div
+                            className="component-preview"
+                            style={{
+                              backgroundColor: comp.backgroundColor || '#ffffff',
+                              color: comp.textColor || '#000000',
+                              textAlign: comp.alignment || 'center'
+                            }}
+                          >
+                            <h4>{comp.title || 'Untitled'}</h4>
+                            <p>{comp.content || ''}</p>
+                            <span className="component-type">{comp.type || 'section'}</span>
+                          </div>
+                          <button
+                            onClick={() => handleRemoveComponent(selectedPage._id, compId)}
+                            className="btn-danger"
+                          >
+                            🗑️ Remove
+                          </button>
                         </div>
-                        <button
-                          onClick={() => handleRemoveComponent(selectedPage._id, comp.id)}
-                          className="btn-danger"
-                        >
-                          🗑️ Remove
-                        </button>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>

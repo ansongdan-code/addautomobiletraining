@@ -120,8 +120,8 @@ const AdminDashboard = () => {
       </header>
 
       {/* Navigation */}
-      <nav className="admin-nav">
-        <ul className="nav-list">
+      <nav className="admin-nav" style={{display: 'block', visibility: 'visible'}}>
+        <ul className="nav-list" style={{display: 'flex', listStyle: 'none', margin: 0, padding: 0}}>
           <li className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}>
             <button 
               onClick={() => setActiveTab('dashboard')}
@@ -192,6 +192,18 @@ const AdminDashboard = () => {
               Analytics
             </button>
           </li>
+          <li className={`nav-item ${activeTab === 'theme' ? 'active' : ''}`}>
+            <button 
+              onClick={() => setActiveTab('theme')}
+              className="nav-link"
+              aria-label="Visual Editor"
+              title="Visual App Editor - Create and customize pages with visual components"
+              style={{color: activeTab === 'theme' ? '#667eea' : '#333'}}
+            >
+              <i className="fas fa-palette"></i>
+              Visual Editor
+            </button>
+          </li>
           <li className={`nav-item ${activeTab === 'editor' ? 'active' : ''}`}>
             <button 
               onClick={() => setActiveTab('editor')}
@@ -200,16 +212,6 @@ const AdminDashboard = () => {
             >
               <i className="fas fa-edit"></i>
               Website Editor
-            </button>
-          </li>
-          <li className={`nav-item ${activeTab === 'theme' ? 'active' : ''}`}>
-            <button 
-              onClick={() => setActiveTab('theme')}
-              className="nav-link"
-              aria-label="Visual Editor"
-            >
-              <i className="fas fa-palette"></i>
-              Visual Editor
             </button>
           </li>
         </ul>
@@ -292,7 +294,35 @@ const AdminDashboard = () => {
         <div>editorMounted: {String(editorMounted)}</div>
       </div>
 
-      {/* Quick switch button */}
+      {/* Quick access buttons */}
+      <button
+        onClick={() => {
+          setActiveTab('theme');
+          setEditorMounted(false);
+        }}
+        style={{
+          position: 'fixed',
+          right: 12,
+          bottom: 80,
+          padding: '12px 20px',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 8,
+          cursor: 'pointer',
+          fontSize: 14,
+          fontWeight: 600,
+          zIndex: 9999,
+          boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+        title="Open Visual Editor"
+      >
+        <i className="fas fa-palette"></i>
+        Visual Editor
+      </button>
       <button
         onClick={() => {
           setActiveTab('editor');

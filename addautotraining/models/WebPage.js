@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
 
 const webPageSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    trim: true
+  },
   title: {
     type: String,
-    required: [true, 'Page title is required'],
-    unique: true,
-    trim: true
+    trim: true,
+    default: function() {
+      return this.name || 'Untitled Page';
+    }
   },
   slug: {
     type: String,
@@ -16,12 +21,24 @@ const webPageSchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: [true, 'Page content is required'],
     default: '<p>Welcome to this page</p>'
   },
   description: {
     type: String,
     maxlength: [500, 'Page description cannot exceed 500 characters']
+  },
+  layout: {
+    type: String,
+    enum: ['standard', 'landing', 'blog', 'gallery'],
+    default: 'standard'
+  },
+  icon: {
+    type: String,
+    default: '📄'
+  },
+  components: {
+    type: [mongoose.Schema.Types.Mixed],
+    default: []
   },
   isPublished: {
     type: Boolean,

@@ -7,6 +7,26 @@ import VisualAppEditor from './VisualAppEditor';
 // Mock axios
 jest.mock('axios');
 
+// Mock localStorage
+const localStorageMock = (function() {
+    let store = {};
+    return {
+        getItem: function(key) {
+            return store[key] || null;
+        },
+        setItem: function(key, value) {
+            store[key] = value.toString();
+        },
+        clear: function() {
+            store = {};
+        }
+    };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock
+});
+
 const mockUser = {
     role: 'super_admin'
 };
@@ -17,10 +37,8 @@ const mockPages = [
 ];
 
 const mockStyles = {
-    theme: {
-        primaryColor: '#000000',
-        secondaryColor: '#ffffff',
-    }
+    primaryColor: '#000000',
+    secondaryColor: '#ffffff',
 };
 
 describe('VisualAppEditor', () => {
@@ -37,6 +55,7 @@ describe('VisualAppEditor', () => {
         axios.post.mockResolvedValue({ data: { data: { _id: '3', name: 'New Page', slug: 'new-page' } } });
         axios.put.mockResolvedValue({ data: { data: { ...mockPages[0], name: 'Updated Home' } } });
         axios.delete.mockResolvedValue({ data: { success: true } });
+        window.localStorage.setItem('token', 'test-token');
     });
 
     test('renders without crashing for super_admin', async () => {
@@ -90,6 +109,8 @@ describe('VisualAppEditor', () => {
     test('allows updating styles', async () => {
         render(<VisualAppEditor userRole={mockUser.role} />);
         fireEvent.click(screen.getByText('🎨 Styles'));
+
+        await screen.findByText('🎨 Global Styles');
 
         // This is a simplified interaction, a real color picker would be more complex
         const primaryColorInput = screen.getByLabelText('Primary Color');

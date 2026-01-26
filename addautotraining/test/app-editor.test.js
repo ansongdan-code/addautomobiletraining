@@ -21,6 +21,9 @@ describe('App Editor API Endpoints', () => {
     let adminToken, superAdminToken, regularToken;
 
     beforeAll(async () => {
+        if (mongoose.connection.readyState !== 0) {
+            await mongoose.disconnect();
+        }
         mongod = await MongoMemoryServer.create();
         const mongoUri = mongod.getUri();
         await mongoose.connect(mongoUri);
@@ -167,27 +170,32 @@ describe('App Editor API Endpoints', () => {
             expect(res.statusCode).toEqual(201);
             expect(res.body.data).toBeDefined();
             const updatedPage = await WebPage.findById(page._id);
-            const content = JSON.parse(updatedPage.content);
-            expect(content.length).toBe(1);
-            expect(content[0].type).toBe('header');
+            expect(updatedPage.components.length).toBe(1);
+            expect(updatedPage.components[0].type).toBe('header');
         });
     });
 
     describe('DELETE /api/editor/app/pages/:pageId/components/:compId', () => {
         it('should delete a component from a page for an admin', async () => {
+            // First add a component
             const page = await WebPage.findOne({ slug: 'test-page' });
-            const component = { _id: new mongoose.Types.ObjectId(), type: 'header', content: { title: 'Header' } };
-            page.content = JSON.stringify([component]);
+            const compId = new mongoose.Types.ObjectId();
+            page.components = [{
+                _id: compId,
+                id: compId.toString(),
+                type: 'header',
+                content: { title: 'Header' }
+            }];
             await page.save();
 
             const res = await request(app)
-                .delete(`/api/editor/app/pages/${page._id}/components/${component._id.toString()}`)
+                .delete(`/api/editor/app/pages/${page._id}/components/${compId.toString()}`)
                 .set('Authorization', `Bearer ${adminToken}`);
-
+            
             expect(res.statusCode).toEqual(200);
+            
             const updatedPage = await WebPage.findById(page._id);
-            const content = JSON.parse(updatedPage.content);
-            expect(content.length).toBe(0);
+            expect(updatedPage.components.length).toBe(0);
         });
     });
     

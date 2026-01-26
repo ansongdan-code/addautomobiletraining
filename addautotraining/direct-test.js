@@ -10,10 +10,7 @@ const testAdminLogin = async () => {
     console.log('🚀 Starting Direct Admin Login Test...');
     
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ MongoDB connected successfully');
 
     // Test 1: Find admin user

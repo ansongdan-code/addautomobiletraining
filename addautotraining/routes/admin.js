@@ -400,7 +400,20 @@ router.put('/settings', [
   ])
 ], async (req, res) => {
   try {
-    const updateData = req.body;
+    const updateData = { ...req.body };
+
+    // Parse stringified fields
+    for (const key in updateData) {
+      if (typeof updateData[key] === 'string') {
+        try {
+          // Attempt to parse, but don't overwrite if it's not JSON
+          const parsed = JSON.parse(updateData[key]);
+          updateData[key] = parsed;
+        } catch (e) {
+          // Not a JSON string, leave it as is
+        }
+      }
+    }
 
     // Handle file uploads
     if (req.files) {
@@ -411,7 +424,10 @@ router.put('/settings', [
         updateData.favicon = getFileUrl(req, req.files.favicon[0].filename);
       }
       if (req.files.heroBackground) {
-        updateData['hero.backgroundImage'] = getFileUrl(req, req.files.heroBackground[0].filename);
+        if (!updateData.hero) {
+            updateData.hero = {};
+        }
+        updateData.hero.backgroundImage = getFileUrl(req, req.files.heroBackground[0].filename);
       }
     }
 

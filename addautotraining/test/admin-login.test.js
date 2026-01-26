@@ -30,14 +30,14 @@ describe('Admin Login Test Suite', () => {
   let mongoUri;
 
   beforeAll(async () => {
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
     // Start in-memory MongoDB and connect for tests
     mongod = await MongoMemoryServer.create();
     const uri = mongod.getUri();
     mongoUri = uri;
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    await mongoose.connect(uri);
 
     // Clear test data
     await User.deleteMany({});

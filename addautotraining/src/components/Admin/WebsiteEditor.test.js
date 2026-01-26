@@ -43,18 +43,15 @@ describe('WebsiteEditor', () => {
     
     expect(screen.getByText('Loading pages...')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.getByText('Home Page')).toBeInTheDocument();
-      expect(screen.getByText('About Us')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Home Page')).toBeInTheDocument();
+    expect(screen.getByText('About Us')).toBeInTheDocument();
   });
 
   test('allows creating a new page', async () => {
     render(<WebsiteEditor userRole="super_admin" />);
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByText('+ New Page'));
-    });
+    const newPageButton = await screen.findByText('+ New Page');
+    fireEvent.click(newPageButton);
 
     expect(screen.getByText('Create New Page')).toBeInTheDocument();
 
@@ -66,16 +63,15 @@ describe('WebsiteEditor', () => {
 
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith('/api/website/editor/pages', expect.any(Object), expect.any(Object));
-      expect(screen.getByText('Page created successfully!')).toBeInTheDocument();
     });
+    expect(await screen.findByText('Page created successfully!')).toBeInTheDocument();
   });
 
   test('allows editing an existing page', async () => {
     render(<WebsiteEditor userRole="super_admin" />);
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByText('Home Page'));
-    });
+    const homePage = await screen.findByText('Home Page');
+    fireEvent.click(homePage);
 
     expect(screen.getByText('Edit Page')).toBeInTheDocument();
 
@@ -85,32 +81,30 @@ describe('WebsiteEditor', () => {
 
     await waitFor(() => {
       expect(axios.put).toHaveBeenCalledWith('/api/website/editor/pages/1', expect.any(Object), expect.any(Object));
-      expect(screen.getByText('Page updated successfully!')).toBeInTheDocument();
     });
+    expect(await screen.findByText('Page updated successfully!')).toBeInTheDocument();
   });
 
   test('allows deleting a page', async () => {
     window.confirm = jest.fn(() => true);
     render(<WebsiteEditor userRole="super_admin" />);
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByText('Home Page'));
-    });
+    const homePage = await screen.findByText('Home Page');
+    fireEvent.click(homePage);
 
     fireEvent.click(screen.getByText('Delete'));
 
     await waitFor(() => {
       expect(axios.delete).toHaveBeenCalledWith('/api/website/editor/pages/1', expect.any(Object));
-      expect(screen.getByText('Page deleted successfully!')).toBeInTheDocument();
     });
+    expect(await screen.findByText('Page deleted successfully!')).toBeInTheDocument();
   });
 
   test('toggles preview mode', async () => {
     render(<WebsiteEditor userRole="super_admin" />);
     
-    await waitFor(() => {
-      fireEvent.click(screen.getByText('Home Page'));
-    });
+    const homePage = await screen.findByText('Home Page');
+    fireEvent.click(homePage);
 
     fireEvent.click(screen.getByRole('button', { name: /preview/i }));
     expect(screen.getByTitle('Page Preview')).toBeInTheDocument();

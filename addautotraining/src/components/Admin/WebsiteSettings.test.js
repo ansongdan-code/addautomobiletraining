@@ -93,23 +93,24 @@ describe('WebsiteSettings Component', () => {
 
   test('fetches and displays settings', async () => {
     render(<WebsiteSettings />);
-    await waitFor(() => {
-      expect(screen.getByLabelText('Site Name *')).toHaveValue(mockSettings.siteName);
-      expect(screen.getByLabelText('Site Description')).toHaveValue(mockSettings.siteDescription);
-    });
+    
+    const siteNameInput = await screen.findByLabelText('Site Name *');
+    expect(siteNameInput).toHaveValue(mockSettings.siteName);
+    expect(screen.getByLabelText('Site Description')).toHaveValue(mockSettings.siteDescription);
   });
 
   test('handles input change in general settings', async () => {
     render(<WebsiteSettings />);
-    await waitFor(() => {
-      fireEvent.change(screen.getByLabelText('Site Name *'), { target: { value: 'New Site Name' } });
-      expect(screen.getByLabelText('Site Name *')).toHaveValue('New Site Name');
-    });
+    
+    const siteNameInput = await screen.findByLabelText('Site Name *');
+    fireEvent.change(siteNameInput, { target: { value: 'New Site Name' } });
+    
+    expect(siteNameInput).toHaveValue('New Site Name');
   });
 
   test('switches between settings sections', async () => {
     render(<WebsiteSettings />);
-    await waitFor(() => screen.getByText('General'));
+    await screen.findByText('General');
 
     fireEvent.click(screen.getByText('Contact'));
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
@@ -122,18 +123,17 @@ describe('WebsiteSettings Component', () => {
     const { showNotification } = require('../../App');
     render(<WebsiteSettings />);
     
-    await waitFor(() => {
-        expect(screen.getByLabelText('Site Name *')).toHaveValue(mockSettings.siteName);
-    });
+    const siteNameInput = await screen.findByLabelText('Site Name *');
+    expect(siteNameInput).toHaveValue(mockSettings.siteName);
 
-    fireEvent.change(screen.getByLabelText('Site Name *'), { target: { value: 'Updated Site Name' } });
+    fireEvent.change(siteNameInput, { target: { value: 'Updated Site Name' } });
     fireEvent.click(screen.getByText('Save Settings'));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/admin/settings', expect.objectContaining({
         method: 'PUT',
       }));
-      expect(showNotification).toHaveBeenCalledWith('Settings updated successfully!', 'success');
     });
+    expect(showNotification).toHaveBeenCalledWith('Settings updated successfully!', 'success');
   });
 });

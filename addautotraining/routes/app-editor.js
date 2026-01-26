@@ -54,13 +54,18 @@ router.use(authorize('admin', 'super_admin'));
 // Get all pages
 router.get('/app/pages', async (req, res) => {
   try {
-    const appPages = await WebPage.find({ author: req.user.id });
+    // For super_admin, show all pages. For admin, show only their pages
+    const query = req.user.role === 'super_admin' 
+      ? {} 
+      : { author: req.user.id };
+    const appPages = await WebPage.find(query).populate('author', 'name email');
     res.json({
       success: true,
       data: appPages,
       total: appPages.length
     });
   } catch (error) {
+    console.error('Error fetching pages:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch pages'
@@ -117,15 +122,16 @@ router.post('/app/pages', async (req, res) => {
     }
 
     const newPage = new WebPage({
-      name,
+      name: name || title || 'Untitled Page',
       slug,
-      title,
-      description,
+      title: title || name || 'Untitled Page',
+      description: description || '',
       layout: layout || 'standard',
       icon: icon || '📄',
       isPublished: isPublished || false,
       author: req.user.id,
       components: [],
+      content: '<p>Welcome to this page</p>'
     });
 
     await newPage.save();
@@ -210,12 +216,30 @@ router.delete('/app/pages/:id', authorize('super_admin'), async (req, res) => {
 // Get global styles
 router.get('/app/styles', async (req, res) => {
   try {
-    const settings = await WebsiteSettings.findOne();
+    let settings = await WebsiteSettings.findOne();
+    if (!settings) {
+      // Create default settings if none exist
+      settings = new WebsiteSettings();
+      await settings.save();
+    }
+    
+    // Ensure theme object exists with defaults
+    if (!settings.theme || typeof settings.theme !== 'object') {
+      settings.theme = {
+        fontFamily: 'Arial, sans-serif',
+        primaryColor: '#2196F3',
+        secondaryColor: '#FFC107',
+        backgroundColor: '#FFFFFF',
+        textColor: '#333333'
+      };
+    }
+    
     res.json({
       success: true,
-      data: settings ? settings.theme : { primaryColor: '#000000' }
+      data: settings.theme
     });
   } catch (error) {
+    console.error('[App Editor] Error fetching styles:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch styles'
@@ -226,13 +250,38 @@ router.get('/app/styles', async (req, res) => {
 // Update global styles
 router.put('/app/styles', async (req, res) => {
   try {
+    console.log('[App Editor] Saving styles:', req.body);
     let settings = await WebsiteSettings.findOne();
     if (!settings) {
+        console.log('[App Editor] Creating new WebsiteSettings document');
         settings = new WebsiteSettings();
     }
     
-    settings.theme = { ...settings.theme, ...req.body };
+    // Only update theme fields that exist in the model
+    const themeUpdate = {
+      fontFamily: req.body.fontFamily || settings.theme?.fontFamily || 'Arial, sans-serif',
+      primaryColor: req.body.primaryColor || settings.theme?.primaryColor || '#2196F3',
+      secondaryColor: req.body.secondaryColor || settings.theme?.secondaryColor || '#FFC107',
+      backgroundColor: req.body.backgroundColor || settings.theme?.backgroundColor || '#FFFFFF',
+      textColor: req.body.textColor || settings.theme?.textColor || '#333333'
+    };
+    
+    // If settings.theme doesn't exist, initialize it
+    if (!settings.theme || typeof settings.theme !== 'object') {
+      settings.theme = {};
+    }
+    
+    // Merge the update
+    settings.theme = { ...settings.theme, ...themeUpdate };
+    
+    // Ensure stats is an array, not a string
+    if (!settings.stats || !Array.isArray(settings.stats)) {
+      settings.stats = [];
+    }
+    
+    console.log('[App Editor] Updated theme:', settings.theme);
     await settings.save();
+    console.log('[App Editor] Settings saved successfully');
 
     res.json({
       success: true,
@@ -240,9 +289,10 @@ router.put('/app/styles', async (req, res) => {
       message: 'Styles updated successfully'
     });
   } catch (error) {
+    console.error('[App Editor] Error saving styles:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to update styles'
+      error: error.message || 'Failed to update styles'
     });
   }
 });
@@ -258,7 +308,7 @@ router.post('/app/pages/:pageId/components', async (req, res) => {
             console.log('Page not found');
             return res.status(404).json({ success: false, error: 'Page not found' });
         }
-        console.log('Page found:', page.title);
+        console.log('Page found:', page.name || page.title);
 
         if (page.author.toString() !== req.user.id && req.user.role !== 'super_admin') {
             console.log('User not authorized');
@@ -271,11 +321,15 @@ router.post('/app/pages/:pageId/components', async (req, res) => {
         };
         console.log('New component:', component);
 
-        const content = JSON.parse(page.content || '[]');
-        console.log('Current content:', content);
-        content.push(component);
-        page.content = JSON.stringify(content);
-        console.log('New content:', page.content);
+        // Use components array if it exists, otherwise initialize it
+        const components = Array.isArray(page.components) ? page.components : [];
+        // Ensure component has an id field that matches _id for frontend compatibility
+        if (!component.id && component._id) {
+          component.id = component._id.toString();
+        }
+        components.push(component);
+        page.components = components;
+        console.log('Updated components:', page.components.length);
 
         await page.save();
         console.log('Page saved');
@@ -303,9 +357,12 @@ router.delete('/app/pages/:pageId/components/:componentId', async (req, res) => 
             return res.status(403).json({ success: false, error: 'Not authorized to edit this page' });
         }
 
-        let content = JSON.parse(page.content || '[]');
-        content = content.filter(c => c._id.toString() !== req.params.componentId);
-        page.content = JSON.stringify(content);
+        // Use components array if it exists
+        const components = page.components || [];
+        page.components = components.filter(c => {
+            const compId = c._id ? c._id.toString() : (c.id || '');
+            return compId !== req.params.componentId;
+        });
 
         await page.save();
 
@@ -314,6 +371,7 @@ router.delete('/app/pages/:pageId/components/:componentId', async (req, res) => 
             message: 'Component deleted successfully'
         });
     } catch (error) {
+        console.error('Error deleting component:', error);
         res.status(500).json({ success: false, error: 'Failed to delete component' });
     }
 });
