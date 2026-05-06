@@ -5,6 +5,7 @@ A comprehensive automotive training platform built with React, Node.js, and Mong
 ## 🚗 Features
 
 ### Frontend (React)
+
 - **Responsive Design**: Mobile-first, responsive web application
 - **User Authentication**: Secure login/registration with JWT tokens
 - **Course Catalog**: Browse automotive training courses by category and skill level
@@ -15,6 +16,7 @@ A comprehensive automotive training platform built with React, Node.js, and Mong
 - **Admin Panel**: Complete course and user management
 
 ### Backend (Node.js/Express)
+
 - **RESTful API**: Well-structured API endpoints
 - **Authentication & Authorization**: JWT-based auth with role-based access
 - **Database Integration**: MongoDB with Mongoose ODM
@@ -40,6 +42,7 @@ A comprehensive automotive training platform built with React, Node.js, and Mong
 ## 🚀 Quick Start
 
 ### 1. Clone and Install
+
 ```bash
 git clone https://github.com/username/addautotraining.git
 cd addautotraining
@@ -47,7 +50,9 @@ npm install
 ```
 
 ### 2. Environment Setup
+
 Create a `.env` file:
+
 ```env
 MONGO_URI=mongodb://localhost:27017/addautotraining
 JWT_SECRET=your-jwt-secret
@@ -90,17 +95,20 @@ npm run test:coverage
 ## 📚 API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `GET /api/auth/me` - Get current user
 
 ### Courses
+
 - `GET /api/courses` - Get all courses
 - `GET /api/courses/:id` - Get specific course
 - `POST /api/courses` - Create course (Admin)
 - `PUT /api/courses/:id` - Update course (Admin)
 
 ### Admin
+
 - `GET /api/admin/users` - Get all users
 - `POST /api/admin/users` - Create user
 - `PUT /api/admin/users/:id` - Update user

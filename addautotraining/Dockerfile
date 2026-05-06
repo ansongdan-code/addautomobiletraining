@@ -3,6 +3,14 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Accept build arguments
+ARG REACT_APP_API_URL
+ARG REACT_APP_PAYPAL_CLIENT_ID
+
+# Set environment variables for build
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV REACT_APP_PAYPAL_CLIENT_ID=$REACT_APP_PAYPAL_CLIENT_ID
+
 # Copy package files
 COPY package*.json ./
 

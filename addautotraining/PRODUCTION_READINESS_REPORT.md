@@ -91,9 +91,11 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-12345
 - ✅ Environment variables used (not hardcoded)
 - ✅ Health checks configured and passing
 - ✅ No sensitive data in logs
+- ✅ Backend validates required production variables and rejects insecure startup
 - ⚠️ **TODO:** Update JWT_SECRET before production deployment
 - ⚠️ **TODO:** Update MongoDB credentials before production
 - ⚠️ **TODO:** Configure HTTPS/SSL for production
+- ℹ️ Optional: set `ENABLE_HTTPS_REDIRECT=true` behind a trusted reverse proxy
 
 ### Performance Optimization
 - ✅ Multi-stage Docker builds (Frontend)

@@ -68,8 +68,19 @@ const WebsiteEditor = ({ userRole, onMount }) => {
     }
   }, [userRole, onMount]);
 
+  if (!userRole) {
+    return (
+      <div className="editor-container">
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <p>Loading editor...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Check authorization - allow admin and super_admin
-  if (userRole !== 'super_admin') {
+  if (userRole !== 'super_admin' && userRole !== 'admin') {
     return (
       <div className="editor-container">
         <div className="error-box">
@@ -237,7 +248,7 @@ const WebsiteEditor = ({ userRole, onMount }) => {
     <div className="website-editor-container">
       <div className="editor-main-header">
         <h1>🌐 Website Editor</h1>
-        <p className="editor-subtitle">For Super Admins Only - Edit website pages and content</p>
+        <p className="editor-subtitle">For Admins and Super Admins - Edit website pages and content</p>
         <p className="editor-guidance">Tip: use <strong>Preview</strong> to check styling, then click <strong>Publish Now</strong> to make changes live.</p>
       </div>
 

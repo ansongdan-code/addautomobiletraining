@@ -86,9 +86,10 @@ describe('WebsiteSettings Component', () => {
     localStorage.removeItem('token');
   });
 
-  test('renders loading state initially', () => {
+  test('renders loading state initially', async () => {
     render(<WebsiteSettings />);
     expect(screen.getByText('Loading settings...')).toBeInTheDocument();
+    await screen.findByText('Website Settings');
   });
 
   test('fetches and displays settings', async () => {

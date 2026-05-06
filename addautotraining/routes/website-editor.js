@@ -3,13 +3,36 @@ const router = express.Router();
 const { protect, authorize, isAdmin } = require('../middleware/auth');
 const WebPage = require('../models/WebPage');
 
+// CSS sanitization function to prevent injection attacks
+const sanitizeCSS = (css) => {
+  if (!css || typeof css !== 'string') return '';
+  
+  // Remove potentially dangerous patterns
+  let sanitized = css
+    .replace(/javascript:/gi, '') // Remove javascript: URLs
+    .replace(/vbscript:/gi, '') // Remove vbscript: URLs
+    .replace(/data:\s*text\/html/gi, '') // Remove data: URLs with HTML
+    .replace(/expression\s*\(/gi, '') // Remove CSS expressions
+    .replace(/behavior\s*:/gi, '') // Remove behavior property
+    .replace(/import\s+/gi, '') // Remove @import
+    .replace(/url\s*\(\s*["']?\s*javascript:/gi, 'url(') // Sanitize url() with JS
+    .replace(/url\s*\(\s*["']?\s*vbscript:/gi, 'url(') // Sanitize url() with VBS
+    .replace(/url\s*\(\s*["']?\s*data:\s*text\/html/gi, 'url('); // Sanitize data: URLs
+  
+  // Basic length limit to prevent DoS
+  if (sanitized.length > 10000) {
+    sanitized = sanitized.substring(0, 10000);
+  }
+  
+  return sanitized;
+};
+
 // Middleware to ensure only super_admin can edit website
 const isSuperAdmin = (req, res, next) => {
-  console.log('[SuperAdmin Check] User role:', req.user?.role, 'Check result:', req.user?.role === 'super_admin');
   if (req.user.role !== 'super_admin') {
     return res.status(403).json({
       success: false,
-      error: 'Only super admin can edit website pages'
+      error: 'Only admin or super admin can edit website pages'
     });
   }
   next();
@@ -136,7 +159,7 @@ router.post('/editor/pages', [protect, isAdmin], async (req, res) => {
       slug: slug.toLowerCase().trim(),
       content,
       description,
-      customCSS: customCSS || '',
+      customCSS: sanitizeCSS(customCSS) || '',
       customJavaScript: customJavaScript || '',
       seoTitle: seoTitle || title,
       seoDescription: seoDescription || description,
@@ -191,7 +214,7 @@ router.put('/editor/pages/:id', [protect, isAdmin], async (req, res) => {
     page.description = description || page.description;
     // Auto-publish on save if not explicitly provided
     page.isPublished = isPublished !== undefined ? !!isPublished : true;
-    page.customCSS = customCSS !== undefined ? customCSS : page.customCSS;
+    page.customCSS = customCSS !== undefined ? sanitizeCSS(customCSS) : page.customCSS;
     page.customJavaScript = customJavaScript !== undefined ? customJavaScript : page.customJavaScript;
     page.seoTitle = seoTitle || page.seoTitle;
     page.seoDescription = seoDescription || page.seoDescription;

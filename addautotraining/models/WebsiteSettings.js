@@ -212,10 +212,13 @@ const websiteSettingsSchema = new mongoose.Schema({
   },
   theme: {
     fontFamily: { type: String, default: 'Arial, sans-serif' },
+    fontSize: { type: String, default: '16px' },
     primaryColor: { type: String, default: '#2196F3' },
     secondaryColor: { type: String, default: '#FFC107' },
+    accentColor: { type: String, default: '#f093fb' },
     backgroundColor: { type: String, default: '#FFFFFF' },
-    textColor: { type: String, default: '#333333' }
+    textColor: { type: String, default: '#333333' },
+    borderRadius: { type: String, default: '8px' }
   },
   customCSS: {
     type: String,

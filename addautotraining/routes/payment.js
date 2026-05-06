@@ -159,7 +159,8 @@ router.post('/paystack/webhook', async (req, res) => {
         await handleFailedPayment(event.data);
         break;
       default:
-        console.log('Unhandled event type:', event.event);
+        // Unhandled event type - silently ignore
+        break;
     }
 
     res.json({ success: true });
@@ -317,7 +318,6 @@ async function handleSuccessfulPayment(paymentData) {
 
 async function handleFailedPayment(paymentData) {
   try {
-    console.log('Payment failed:', paymentData);
     // Handle failed payment logic here
   } catch (error) {
     console.error('Error handling failed payment:', error);

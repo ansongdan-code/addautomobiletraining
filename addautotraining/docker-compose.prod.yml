@@ -18,7 +18,7 @@ services:
     container_name: addauto_backend
     restart: always
     env_file:
-      - .env
+      - .env.production
     depends_on:
       - mongo
     ports:
@@ -34,11 +34,10 @@ services:
       - backend
     ports:
       - "80:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`yourdomain.com`)"
+      - "traefik.http.routers.frontend.tls=true"
 
 volumes:
   mongo_data:
-labels:
-  - "traefik.enable=true"
-  - "
-  traefik.http.routers.frontend.rule=Host(`yourdomain.com`)"
-  - "traefik.http.routers.frontend.tls=true"

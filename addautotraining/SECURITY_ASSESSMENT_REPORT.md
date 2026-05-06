@@ -1,4 +1,5 @@
 # 🔐 Security Assessment Report
+
 **Auto Training Academy - Full Stack Application**
 
 **Date:** January 26, 2026  

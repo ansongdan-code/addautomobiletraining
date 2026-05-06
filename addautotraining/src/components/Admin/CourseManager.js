@@ -13,11 +13,12 @@ const CourseManager = () => {
     title: '',
     description: '',
     instructor: '',
-    duration: '',
-    level: 'Beginner',
+    duration: { weeks: '', hours: '' },
+    level: 'beginner',
     price: '',
-    category: '',
-    image: ''
+    category: 'engine',
+    image: '',
+    status: 'draft'
   });
 
   useEffect(() => {
@@ -28,7 +29,8 @@ const CourseManager = () => {
     setLoading(true);
     try {
       const response = await axios.get('/api/courses');
-      setCourses(response.data.data || []);
+      // The backend returns the array directly or in a data property
+      setCourses(Array.isArray(response.data) ? response.data : response.data.data || []);
     } catch (err) {
       console.error('Error fetching courses:', err);
     }
@@ -37,7 +39,15 @@ const CourseManager = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setFormData({
+        ...formData,
+        [parent]: { ...formData[parent], [child]: value }
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleNewCourse = () => {
@@ -45,11 +55,12 @@ const CourseManager = () => {
       title: '',
       description: '',
       instructor: '',
-      duration: '',
-      level: 'Beginner',
+      duration: { weeks: '', hours: '' },
+      level: 'beginner',
       price: '',
-      category: '',
-      image: ''
+      category: 'engine',
+      image: '',
+      status: 'draft'
     });
     setIsCreating(true);
     setIsEditing(false);
@@ -58,10 +69,14 @@ const CourseManager = () => {
 
   const handleEditCourse = (course) => {
     setSelectedCourse(course);
-    setFormData(course);
+    setFormData({
+      ...course,
+      duration: course.duration || { weeks: '', hours: '' }
+    });
     setIsEditing(true);
     setIsCreating(false);
   };
+
 
   const handleSave = async () => {
     setLoading(true);
@@ -186,39 +201,61 @@ const CourseManager = () => {
               <div className="form-group">
                 <label>Level</label>
                 <select name="level" value={formData.level} onChange={handleInputChange}>
-                  <option>Beginner</option>
-                  <option>Intermediate</option>
-                  <option>Advanced</option>
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
                 </select>
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>Instructor</label>
+                <label>Instructor ID (User ObjectId) *</label>
                 <input
                   type="text"
                   name="instructor"
                   value={formData.instructor}
                   onChange={handleInputChange}
-                  placeholder="Instructor name"
+                  placeholder="Instructor User ID"
+                  required
                 />
               </div>
               <div className="form-group">
-                <label>Duration</label>
+                <label>Status</label>
+                <select name="status" value={formData.status} onChange={handleInputChange}>
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Duration (Weeks)</label>
                 <input
-                  type="text"
-                  name="duration"
-                  value={formData.duration}
+                  type="number"
+                  name="duration.weeks"
+                  value={formData.duration.weeks}
                   onChange={handleInputChange}
-                  placeholder="e.g., 8 weeks"
+                  placeholder="Weeks"
+                />
+              </div>
+              <div className="form-group">
+                <label>Duration (Hours)</label>
+                <input
+                  type="number"
+                  name="duration.hours"
+                  value={formData.duration.hours}
+                  onChange={handleInputChange}
+                  placeholder="Hours"
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>Price</label>
+                <label>Price ($)</label>
                 <input
                   type="number"
                   name="price"
@@ -229,15 +266,20 @@ const CourseManager = () => {
               </div>
               <div className="form-group">
                 <label>Category</label>
-                <input
-                  type="text"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Automotive"
-                />
+                <select name="category" value={formData.category} onChange={handleInputChange}>
+                  <option value="engine">Engine</option>
+                  <option value="transmission">Transmission</option>
+                  <option value="brakes">Brakes</option>
+                  <option value="suspension">Suspension</option>
+                  <option value="electrical">Electrical</option>
+                  <option value="diagnostic">Diagnostic</option>
+                  <option value="hybrid">Hybrid</option>
+                  <option value="electric">Electric</option>
+                  <option value="general">General</option>
+                </select>
               </div>
             </div>
+
 
             <div className="form-group full">
               <label>Description</label>

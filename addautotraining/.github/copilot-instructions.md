@@ -1,5 +1,7 @@
 # AI Coding Agent Instructions - Auto Training Academy
 
+> See `.github/AGENTS.md` for repo-specific custom agents that support auth, payments, deployment, frontend, and admin workflows.
+
 ## Project Architecture
 
 This is a **full-stack MERN application** (MongoDB, Express, React, Node.js) for an automotive training platform with payment processing and admin management. The architecture uses a **monorepo pattern** where frontend React app and backend Express server share the same repository root.
@@ -308,10 +310,10 @@ docker volume prune
 - **Model location**: [models/WebsiteSettings.js](models/WebsiteSettings.js)
 - **Editor component**: [src/components/Admin/WebsiteEditor.js](src/components/Admin/WebsiteEditor.js)
 - **API route**: [routes/website-editor.js](routes/website-editor.js)
-- **Requires role**: `super_admin` only
+- **Requires role**: `admin` or `super_admin`
 
 ### Page Creation & CSS Injection Flow
-1. **Create/edit page**: Super admin visits Website Editor tab → Edits page slug, title, custom CSS
+1. **Create/edit page**: Admin or super admin visits Website Editor tab → Edits page slug, title, custom CSS
 2. **Store in DB**: CSS stored in `WebsiteSettings` collection per page slug
 3. **Frontend render**: When user navigates to page, [App.js](src/App.js#L60) injects CSS into `<head>` via `useEffect`
 4. **CSS format**: Must be valid CSS; sanitization recommended before storage (currently not implemented—add validation if user submissions enabled)
@@ -359,7 +361,7 @@ useEffect(() => {
 ```
 
 ### Important Constraints
-- **Super_admin only**: Regular admins cannot access Website Editor
+- **Admin or super_admin**: Regular users cannot access Website Editor
 - **XSS risk**: Custom CSS cannot include scripts, but CSS3 injection attacks possible—validate regex patterns
 - **No page routing**: Website Editor doesn't create routes; only injects CSS for existing paths (use `/about` not `/custom/about`)
 - **CSS persistence**: Changes survive server restarts (stored in MongoDB); cleared when WebsiteSettings document deleted

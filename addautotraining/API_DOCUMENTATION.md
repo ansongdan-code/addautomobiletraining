@@ -374,13 +374,13 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## ✏️ Website Editor (Super Admin Only)
+## ✏️ Website Editor (Admin and Super Admin)
 
 ### Get All Pages
 
 **Endpoint:** `GET /website/editor/pages`
 
-**Headers:** `Authorization: Bearer <JWT_TOKEN>` (Super Admin required)
+**Headers:** `Authorization: Bearer <JWT_TOKEN>` (Admin or Super Admin required)
 
 **Response (200 OK):**
 ```json

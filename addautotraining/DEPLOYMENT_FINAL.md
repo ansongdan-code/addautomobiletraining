@@ -103,7 +103,7 @@ Created comprehensive CSS styling file with:
 - `GET /api/admin/dashboard` - Dashboard statistics
 - `POST /api/admin/create-user` - Create user (admin only)
 
-### Website Editor (Super Admin Only)
+### Website Editor (Admin and Super Admin)
 - `GET /api/website/editor/pages` - List all pages
 - `POST /api/website/editor/pages` - Create new page
 - `PUT /api/website/editor/pages/:id` - Update page

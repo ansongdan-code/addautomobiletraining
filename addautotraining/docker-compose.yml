@@ -7,8 +7,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: addautotraining
-    ports:
-      - "27017:27017"
     volumes:
       - mongo_data:/data/db
     healthcheck:
@@ -31,11 +29,12 @@ services:
       mongo:
         condition: service_healthy
     env_file:
-      - .env
+      - .env.production
     environment:
       - NODE_ENV=production
       - MONGO_URI=mongodb://admin:${MONGO_PASSWORD}@mongo:27017/addautotraining?authSource=admin
       - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - ./uploads:/app/uploads
     networks:
@@ -45,6 +44,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=http://localhost:5000/api
+        - REACT_APP_PAYPAL_CLIENT_ID=${REACT_APP_PAYPAL_CLIENT_ID}
     container_name: addauto_frontend
     restart: always
     ports:

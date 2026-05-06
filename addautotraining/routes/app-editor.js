@@ -227,16 +227,31 @@ router.get('/app/styles', async (req, res) => {
     if (!settings.theme || typeof settings.theme !== 'object') {
       settings.theme = {
         fontFamily: 'Arial, sans-serif',
+        fontSize: '16px',
         primaryColor: '#2196F3',
         secondaryColor: '#FFC107',
+        accentColor: '#f093fb',
         backgroundColor: '#FFFFFF',
-        textColor: '#333333'
+        textColor: '#333333',
+        borderRadius: '8px'
       };
     }
-    
+
+    // Ensure all theme fields have values
+    const theme = {
+      fontFamily: settings.theme.fontFamily || 'Arial, sans-serif',
+      fontSize: settings.theme.fontSize || '16px',
+      primaryColor: settings.theme.primaryColor || '#2196F3',
+      secondaryColor: settings.theme.secondaryColor || '#FFC107',
+      accentColor: settings.theme.accentColor || '#f093fb',
+      backgroundColor: settings.theme.backgroundColor || '#FFFFFF',
+      textColor: settings.theme.textColor || '#333333',
+      borderRadius: settings.theme.borderRadius || '8px'
+    };
+
     res.json({
       success: true,
-      data: settings.theme
+      data: theme
     });
   } catch (error) {
     console.error('[App Editor] Error fetching styles:', error);
@@ -250,20 +265,21 @@ router.get('/app/styles', async (req, res) => {
 // Update global styles
 router.put('/app/styles', async (req, res) => {
   try {
-    console.log('[App Editor] Saving styles:', req.body);
     let settings = await WebsiteSettings.findOne();
     if (!settings) {
-        console.log('[App Editor] Creating new WebsiteSettings document');
         settings = new WebsiteSettings();
     }
     
-    // Only update theme fields that exist in the model
+    // Update all theme fields from request body, with defaults as fallback
     const themeUpdate = {
-      fontFamily: req.body.fontFamily || settings.theme?.fontFamily || 'Arial, sans-serif',
-      primaryColor: req.body.primaryColor || settings.theme?.primaryColor || '#2196F3',
-      secondaryColor: req.body.secondaryColor || settings.theme?.secondaryColor || '#FFC107',
-      backgroundColor: req.body.backgroundColor || settings.theme?.backgroundColor || '#FFFFFF',
-      textColor: req.body.textColor || settings.theme?.textColor || '#333333'
+      fontFamily: req.body.fontFamily !== undefined ? req.body.fontFamily : (settings.theme?.fontFamily || 'Arial, sans-serif'),
+      fontSize: req.body.fontSize !== undefined ? req.body.fontSize : (settings.theme?.fontSize || '16px'),
+      primaryColor: req.body.primaryColor !== undefined ? req.body.primaryColor : (settings.theme?.primaryColor || '#2196F3'),
+      secondaryColor: req.body.secondaryColor !== undefined ? req.body.secondaryColor : (settings.theme?.secondaryColor || '#FFC107'),
+      accentColor: req.body.accentColor !== undefined ? req.body.accentColor : (settings.theme?.accentColor || '#f093fb'),
+      backgroundColor: req.body.backgroundColor !== undefined ? req.body.backgroundColor : (settings.theme?.backgroundColor || '#FFFFFF'),
+      textColor: req.body.textColor !== undefined ? req.body.textColor : (settings.theme?.textColor || '#333333'),
+      borderRadius: req.body.borderRadius !== undefined ? req.body.borderRadius : (settings.theme?.borderRadius || '8px')
     };
     
     // If settings.theme doesn't exist, initialize it
@@ -279,20 +295,20 @@ router.put('/app/styles', async (req, res) => {
       settings.stats = [];
     }
     
-    console.log('[App Editor] Updated theme:', settings.theme);
-    await settings.save();
-    console.log('[App Editor] Settings saved successfully');
+    const updatedSettings = await settings.save();
+    console.log('[App Editor] Styles saved successfully:', updatedSettings.theme);
 
     res.json({
       success: true,
-      data: settings.theme,
+      data: updatedSettings.theme,
       message: 'Styles updated successfully'
     });
   } catch (error) {
     console.error('[App Editor] Error saving styles:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to update styles'
+      error: error.message || 'Failed to update styles',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -302,16 +318,12 @@ router.put('/app/styles', async (req, res) => {
 // Add component to page
 router.post('/app/pages/:pageId/components', async (req, res) => {
     try {
-        console.log('Adding component to page:', req.params.pageId);
         const page = await WebPage.findById(req.params.pageId);
         if (!page) {
-            console.log('Page not found');
             return res.status(404).json({ success: false, error: 'Page not found' });
         }
-        console.log('Page found:', page.name || page.title);
 
         if (page.author.toString() !== req.user.id && req.user.role !== 'super_admin') {
-            console.log('User not authorized');
             return res.status(403).json({ success: false, error: 'Not authorized to edit this page' });
         }
 
@@ -319,7 +331,6 @@ router.post('/app/pages/:pageId/components', async (req, res) => {
             _id: new mongoose.Types.ObjectId(),
             ...req.body,
         };
-        console.log('New component:', component);
 
         // Use components array if it exists, otherwise initialize it
         const components = Array.isArray(page.components) ? page.components : [];
@@ -329,10 +340,8 @@ router.post('/app/pages/:pageId/components', async (req, res) => {
         }
         components.push(component);
         page.components = components;
-        console.log('Updated components:', page.components.length);
 
         await page.save();
-        console.log('Page saved');
 
         res.status(201).json({
             success: true,

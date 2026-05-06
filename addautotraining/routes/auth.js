@@ -36,7 +36,9 @@ async (req, res) => {
 
     res.json({ token });
   } catch (err) {
-    console.error(err.message);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error(err.message);
+    }
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -54,20 +56,14 @@ async (req, res) => {
 
   const { email, password } = req.body;
 
-  console.log('Login request body:', { email, passwordLength: password ? password.length : 0 });
-
   try {
     const user = await User.findOne({ email }).select('+password');
-
-    console.log('User from DB for login:', user ? { email: user.email, hasPassword: !!user.password, passwordPrefix: String(user.password).slice(0, 10) } : null);
 
     if (!user) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
     const isMatch = await user.comparePassword(password);
-
-    console.log('Password compare result:', { email, isMatch });
 
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
@@ -82,7 +78,9 @@ async (req, res) => {
 
     res.json({ token });
   } catch (err) {
-    console.error(err.message);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error(err.message);
+    }
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -104,7 +102,9 @@ router.get('/me', protect, async (req, res) => {
       data: user
     });
   } catch (err) {
-    console.error(err.message);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error(err.message);
+    }
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });

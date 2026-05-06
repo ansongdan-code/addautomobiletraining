@@ -24,8 +24,6 @@ exports.protect = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password');
     
-    console.log('[Auth Debug] User found:', { email: user?.email, role: user?.role });
-    
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -41,10 +39,11 @@ exports.protect = async (req, res, next) => {
     }
 
     req.user = user;
-    console.log('[Auth Debug] Setting req.user with role:', req.user.role);
     next();
   } catch (error) {
-    console.error('Token verification error:', error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Token verification error:', error);
+    }
     return res.status(401).json({
       success: false,
       error: 'Not authorized to access this route'

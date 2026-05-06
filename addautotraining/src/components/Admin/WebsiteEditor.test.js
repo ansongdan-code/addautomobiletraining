@@ -33,9 +33,9 @@ describe('WebsiteEditor', () => {
     axios.delete.mockResolvedValue({ data: { success: true } });
   });
 
-  test('renders access denied for non-super-admin users', () => {
-    render(<WebsiteEditor userRole="admin" />);
-    expect(screen.getByText('Access Denied')).toBeInTheDocument();
+  test('renders access denied for unauthorized users', () => {
+    render(<WebsiteEditor userRole="student" />);
+    expect(screen.getByRole('heading', { name: 'Access Denied' })).toBeInTheDocument();
   });
 
   test('fetches and displays pages for super-admin users', async () => {

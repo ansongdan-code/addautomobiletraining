@@ -43,7 +43,7 @@ const fetch = global.fetch;
     }
     console.log('✓ Draft preview accessible with auth\n');
 
-    // Test 4: Fetch editor pages (super_admin only)
+    // Test 4: Fetch editor pages (admin or super_admin)
     console.log('4. [Editor API] Fetching all pages for editor...');
     const editorRes = await fetch(`${base}/api/website/editor/pages`, {
       headers: { Authorization: `Bearer ${token}` }

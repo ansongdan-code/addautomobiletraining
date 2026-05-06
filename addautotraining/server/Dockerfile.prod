@@ -10,6 +10,11 @@ COPY . .
 # Install PM2 globally
 RUN npm install pm2 -g
 
+# Create a non-root user for improved container security
+RUN addgroup -S app && adduser -S app -G app
+RUN chown -R app:app /app
+USER app
+
 EXPOSE 5000
 
 CMD ["pm2-runtime", "server.js"]

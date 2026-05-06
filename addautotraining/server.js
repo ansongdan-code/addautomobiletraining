@@ -12,8 +12,28 @@ const path = require('path');
 const compression = require('compression');
 require('dotenv').config();
 
-// Safe defaults for frontend URL used by CORS
-const FRONTEND_URL = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'http://localhost:3000' : 'http://localhost:3000');
+const FRONTEND_URL = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? null : 'http://localhost:3000');
+
+const REQUIRED_PROD_ENV = ['MONGO_URI', 'JWT_SECRET', 'FRONTEND_URL'];
+
+const validateProductionEnv = () => {
+  if (process.env.NODE_ENV !== 'production') {
+    return;
+  }
+
+  const missing = REQUIRED_PROD_ENV.filter((key) => !process.env[key]);
+  if (missing.length) {
+    console.error(`Missing required production environment variables: ${missing.join(', ')}`);
+    process.exit(1);
+  }
+
+  if (process.env.JWT_SECRET.length < 32) {
+    console.error('JWT_SECRET must be at least 32 characters long in production.');
+    process.exit(1);
+  }
+};
+
+validateProductionEnv();
 
 const User = require('./models/User');
 const Course = require('./models/Course');
@@ -34,6 +54,16 @@ const app = express();
 
 // Trust proxy for accurate IP addresses when behind a load balancer/reverse proxy
 app.set('trust proxy', 1);
+
+if (process.env.ENABLE_HTTPS_REDIRECT === 'true') {
+  app.use((req, res, next) => {
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    if (req.secure || forwardedProto === 'https') {
+      return next();
+    }
+    return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
+  });
+}
 
 // Security and performance middleware
 const helmet = require('helmet');
@@ -76,8 +106,9 @@ app.use((req, res, next) => {
 });
 
 // CORS configuration
+const allowedOrigins = [FRONTEND_URL].filter(Boolean);
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: allowedOrigins,
   credentials: true
 }));
 
@@ -91,7 +122,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // MongoDB connection with optimizations and retry logic
 const connectDB = async () => {
   try {
-    console.log('MONGO_URI:', process.env.MONGO_URI);
+    console.log('Connecting to MongoDB...');
     await mongoose.connect(process.env.MONGO_URI, {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 10000,
