@@ -20,6 +20,15 @@ cd c:\Users\HP\OneDrive\Documents\addautomobiletraining\addautotraining
 docker-compose up -d
 ```
 
+> Note: `docker-compose.yml` loads `.env.production` automatically. Verify `.env.production` is present before starting.
+
+### Advanced Production Deployment
+```bash
+docker-compose -f docker-compose.production.yml up --build -d
+```
+
+> Use this command for the full production stack with Nginx SSL proxy and secure HTTP routing.
+
 ### Stop Everything
 ```bash
 docker-compose down

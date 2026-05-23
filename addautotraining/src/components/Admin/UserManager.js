@@ -45,7 +45,8 @@ const UserManager = () => {
 
   const userStats = {
     total: users.length,
-    students: users.filter(u => u.role === 'user').length,
+    students: users.filter(u => u.role === 'student').length,
+    instructors: users.filter(u => u.role === 'instructor').length,
     admins: users.filter(u => u.role === 'admin').length,
     superAdmins: users.filter(u => u.role === 'super_admin').length
   };
@@ -54,8 +55,8 @@ const UserManager = () => {
     <div className="user-manager">
       <div className="user-header">
         <div className="user-title-section">
-          <h1>👥 Student Manager</h1>
-          <p>Manage and monitor all registered students and users</p>
+          <h1>👥 User Manager</h1>
+          <p>Manage and monitor all platform users</p>
         </div>
       </div>
 
@@ -67,6 +68,10 @@ const UserManager = () => {
         <div className="stat-card">
           <div className="stat-number">{userStats.students}</div>
           <div className="stat-label">Students</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-number">{userStats.instructors}</div>
+          <div className="stat-label">Instructors</div>
         </div>
         <div className="stat-card">
           <div className="stat-number">{userStats.admins}</div>
@@ -91,12 +96,14 @@ const UserManager = () => {
           <div className="filter-group">
             <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)}>
               <option value="all">All Roles</option>
-              <option value="user">Students</option>
+              <option value="student">Students</option>
+              <option value="instructor">Instructors</option>
               <option value="admin">Admins</option>
               <option value="super_admin">Super Admins</option>
             </select>
           </div>
         </div>
+
 
         {loading ? (
           <div className="loading">Loading users...</div>
@@ -125,7 +132,9 @@ const UserManager = () => {
                 </div>
                 <div className="col-role">
                   <span className={`role-badge ${user.role}`}>
-                    {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : 'Student'}
+                    {user.role === 'super_admin' ? 'Super Admin' :
+                     user.role === 'admin' ? 'Admin' :
+                     user.role === 'instructor' ? 'Instructor' : 'Student'}
                   </span>
                 </div>
                 <div className="col-joined">

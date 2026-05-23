@@ -174,6 +174,15 @@ cd c:\Users\HP\OneDrive\Documents\addautomobiletraining\addautotraining
 docker-compose up -d
 ```
 
+> Note: `docker-compose.yml` loads `.env.production` automatically. Make sure `.env.production` is configured before starting.
+
+### Optional advanced production start
+```bash
+docker-compose -f docker-compose.production.yml up --build -d
+```
+
+> Use this for the full production deployment with Nginx and HTTPS support.
+
 ### To Access the Application
 - **Frontend:** http://localhost:3000
 - **Backend API:** http://localhost:5000

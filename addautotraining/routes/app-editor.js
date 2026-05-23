@@ -5,6 +5,33 @@ const router = express.Router();
 const WebPage = require('../models/WebPage');
 const WebsiteSettings = require('../models/WebsiteSettings');
 
+const sanitizeHTML = (html) => {
+  if (!html || typeof html !== 'string') return '';
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/on\w+\s*=\s*(['"][\s\S]*?['"])/gi, '')
+    .replace(/on\w+\s*=\s*[^\s>]+/gi, '')
+    .replace(/javascript\s*:/gi, '')
+    .replace(/vbscript\s*:/gi, '')
+    .replace(/data:\s*text\/html/gi, '')
+    .replace(/<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi, '');
+};
+
+const sanitizeCSS = (css) => {
+  if (!css || typeof css !== 'string') return '';
+  return css
+    .replace(/<\/(style)>/gi, '')
+    .replace(/<style[^>]*>/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/expression\s*\(/gi, '')
+    .replace(/behavior\s*:/gi, '')
+    .replace(/import\s+/gi, '')
+    .replace(/url\s*\(\s*["']?\s*javascript:/gi, 'url(')
+    .replace(/url\s*\(\s*["']?\s*vbscript:/gi, 'url(')
+    .replace(/url\s*\(\s*["']?\s*data:\s*text\/html/gi, 'url(');
+};
+
 // ============= PREVIEW ENDPOINT =============
 
 // Get page for preview
@@ -17,6 +44,7 @@ router.get('/page/:slug', async (req, res) => {
         }
 
         const settings = await WebsiteSettings.findOne();
+        const fontFamily = settings && settings.theme ? String(settings.theme.fontFamily).replace(/["'<>]/g, '') : 'Arial, sans-serif';
 
         // This is a simplified HTML generation. In a real app, you'd use a templating engine.
         const html = `
@@ -28,14 +56,13 @@ router.get('/page/:slug', async (req, res) => {
         <title>${page.title}</title>
         <style>
           body {
-            font-family: ${settings && settings.theme ? settings.theme.fontFamily : 'Arial, sans-serif'};
+            font-family: ${fontFamily};
           }
         </style>
-        <style>${page.customCSS}</style>
+        <style>${sanitizeCSS(page.customCSS)}</style>
       </head>
       <body>
-        ${page.content}
-        <script>${page.customJavaScript}</script>
+        ${sanitizeHTML(page.content)}
       </body>
       </html>
     `;
@@ -296,7 +323,6 @@ router.put('/app/styles', async (req, res) => {
     }
     
     const updatedSettings = await settings.save();
-    console.log('[App Editor] Styles saved successfully:', updatedSettings.theme);
 
     res.json({
       success: true,
@@ -382,46 +408,6 @@ router.delete('/app/pages/:pageId/components/:componentId', async (req, res) => 
     } catch (error) {
         console.error('Error deleting component:', error);
         res.status(500).json({ success: false, error: 'Failed to delete component' });
-    }
-});
-
-// ============= PREVIEW ENDPOINT =============
-
-// Get page for preview
-router.get('/page/:slug', async (req, res) => {
-    try {
-        const page = await WebPage.findOne({ slug: req.params.slug });
-
-        if (!page || !page.isPublished) {
-            return res.status(404).json({ success: false, error: 'Page not found or not published' });
-        }
-
-        const settings = await WebsiteSettings.findOne();
-
-        // This is a simplified HTML generation. In a real app, you'd use a templating engine.
-        const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${page.title}</title>
-        <style>
-          body {
-            font-family: ${settings && settings.theme ? settings.theme.fontFamily : 'Arial, sans-serif'};
-          }
-        </style>
-        <style>${page.customCSS}</style>
-      </head>
-      <body>
-        ${page.content}
-        <script>${page.customJavaScript}</script>
-      </body>
-      </html>
-    `;
-        res.send(html);
-    } catch (error) {
-        res.status(500).send('<h1>Error loading page</h1>');
     }
 });
 

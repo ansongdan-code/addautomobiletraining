@@ -1,16 +1,23 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const swaggerUi = require('swagger-ui-express');
 // PayPal SDK is optional; only require if available at runtime to avoid crashes
 let paypal = null;
 try {
   // attempt to require but do not throw if missing
   paypal = require('@paypal/checkout-server-sdk');
 } catch (e) {
-  console.log('PayPal checkout-server-sdk not available, legacy PayPal routes will be disabled');
+  // optional dependency in some environments
 }
 const path = require('path');
 const compression = require('compression');
 require('dotenv').config();
+const swaggerSpec = require('./docs/swagger');
+const logger = require('./utils/logger');
+
+if (!paypal) {
+  logger.warn('PayPal checkout-server-sdk not available, legacy PayPal routes will be disabled');
+}
 
 const FRONTEND_URL = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? null : 'http://localhost:3000');
 
@@ -23,12 +30,12 @@ const validateProductionEnv = () => {
 
   const missing = REQUIRED_PROD_ENV.filter((key) => !process.env[key]);
   if (missing.length) {
-    console.error(`Missing required production environment variables: ${missing.join(', ')}`);
+    logger.error(`Missing required production environment variables: ${missing.join(', ')}`);
     process.exit(1);
   }
 
   if (process.env.JWT_SECRET.length < 32) {
-    console.error('JWT_SECRET must be at least 32 characters long in production.');
+    logger.error('JWT_SECRET must be at least 32 characters long in production.');
     process.exit(1);
   }
 };
@@ -113,7 +120,15 @@ app.use(cors({
 }));
 
 // Request logging
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', {
+  stream: logger.stream
+}));
+
+// Raw body parser for Paystack webhook verification
+app.use('/api/payment/paystack/webhook', express.raw({
+  type: 'application/json',
+  limit: '10mb'
+}));
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
@@ -122,16 +137,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // MongoDB connection with optimizations and retry logic
 const connectDB = async () => {
   try {
-    console.log('Connecting to MongoDB...');
+    logger.info('Connecting to MongoDB...');
     await mongoose.connect(process.env.MONGO_URI, {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000
     });
-    console.log('MongoDB connected successfully');
+    logger.info('MongoDB connected successfully');
   } catch (err) {
-    console.error('MongoDB connection error:', err.message);
-    console.log('Retrying MongoDB connection in 5 seconds...');
+    logger.error(`MongoDB connection error: ${err.message}`);
+    logger.info('Retrying MongoDB connection in 5 seconds...');
     setTimeout(connectDB, 5000);
   }
 };
@@ -184,6 +199,12 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/website', websiteEditorRoutes);
 app.use('/api/editor', appEditorRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true
+}));
+app.get('/api-docs.json', (req, res) => {
+  res.json(swaggerSpec);
+});
 
 // PayPal integration (legacy)
 const clientId = process.env.PAYPAL_CLIENT_ID;
@@ -295,7 +316,7 @@ app.get('/api/search', async (req, res) => {
       data: results
     });
   } catch (error) {
-    console.error('Search error:', error);
+    logger.error(`Search error: ${error.message}`, { stack: error.stack });
     res.status(500).json({
       success: false,
       error: 'Search failed'
@@ -326,24 +347,24 @@ if (process.env.NODE_ENV === 'production') {
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`Server running on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
+  logger.info('SIGTERM received, shutting down gracefully');
   server.close(() => {
-    console.log('Process terminated');
+    logger.info('Process terminated');
     mongoose.connection.close();
     process.exit(0);
   });
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
+  logger.info('SIGINT received, shutting down gracefully');
   server.close(() => {
-    console.log('Process terminated');
+    logger.info('Process terminated');
     mongoose.connection.close();
     process.exit(0);
   });

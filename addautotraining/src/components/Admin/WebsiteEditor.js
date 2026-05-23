@@ -37,6 +37,33 @@ const WebsiteEditor = ({ userRole, onMount }) => {
     seoKeywords: []
   });
 
+  const sanitizeHTML = (html) => {
+    if (!html || typeof html !== 'string') return '';
+    return html
+      .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+      .replace(/on\w+\s*=\s*(['"][\s\S]*?['"])/gi, '')
+      .replace(/on\w+\s*=\s*[^\s>]+/gi, '')
+      .replace(/javascript\s*:/gi, '')
+      .replace(/vbscript\s*:/gi, '')
+      .replace(/data:\s*text\/html/gi, '')
+      .replace(/<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi, '');
+  };
+
+  const sanitizeCSS = (css) => {
+    if (!css || typeof css !== 'string') return '';
+    return css
+      .replace(/<\/(style)>/gi, '')
+      .replace(/<style[^>]*>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/vbscript:/gi, '')
+      .replace(/expression\s*\(/gi, '')
+      .replace(/behavior\s*:/gi, '')
+      .replace(/@import/gi, '')
+      .replace(/url\s*\(\s*["']?\s*javascript:/gi, 'url(')
+      .replace(/url\s*\(\s*["']?\s*vbscript:/gi, 'url(')
+      .replace(/url\s*\(\s*["']?\s*data:\s*text\/html/gi, 'url(');
+  };
+
   // Fetch pages function
   const fetchPages = async () => {
     try {
@@ -57,7 +84,6 @@ const WebsiteEditor = ({ userRole, onMount }) => {
 
   // Fetch pages on mount
   useEffect(() => {
-    console.log('[WebsiteEditor] checking userRole=', userRole);
     // Notify parent that editor rendered (helpful for debugging)
     if (typeof onMount === 'function') {
       try { onMount(); } catch (e) { /* noop */ }
@@ -321,16 +347,15 @@ const WebsiteEditor = ({ userRole, onMount }) => {
                     srcDoc={`
                       <html>
                         <head>
-                          <style>${formData.customCSS}</style>
+                          <style>${sanitizeCSS(formData.customCSS)}</style>
                         </head>
                         <body>
-                          ${formData.content}
-                          <script>${formData.customJavaScript}</script>
+                          ${sanitizeHTML(formData.content)}
                         </body>
                       </html>
                     `}
                     title="Page Preview"
-                    sandbox="allow-scripts"
+                    sandbox=""
                   />
                 </div>
               ) : (
@@ -373,7 +398,8 @@ const WebsiteEditor = ({ userRole, onMount }) => {
                       </div>
                       <div className="form-group">
                         <label htmlFor="customJavaScript">Custom JavaScript</label>
-                        <textarea id="customJavaScript" name="customJavaScript" value={formData.customJavaScript} onChange={handleInputChange} rows="5" />
+                        <textarea id="customJavaScript" name="customJavaScript" value={formData.customJavaScript} onChange={handleInputChange} rows="5" disabled />
+                        <p className="field-note">Custom JavaScript is disabled for security and is not executed.</p>
                       </div>
                     </div>
                   </div>

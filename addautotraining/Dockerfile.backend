@@ -5,20 +5,29 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies (PayPal SDK is required)
-RUN npm install --legacy-peer-deps
+# Install production dependencies only
+ENV NODE_ENV=production
+RUN npm ci --omit=dev --legacy-peer-deps
 
 # Copy backend source code
 COPY server.js ./
 COPY docker-init.js ./
 COPY models ./models
 COPY routes ./routes
+COPY controllers ./controllers
+COPY services ./services
+COPY docs ./docs
+COPY utils ./utils
 COPY middleware ./middleware
 COPY api ./api
 COPY uploads ./uploads
+# Configure production logging defaults
+ENV LOG_DIR=/app/logs
+ENV LOG_LEVEL=info
+ENV ENABLE_FILE_LOGGING=true
 
-# Create uploads directory with proper permissions
-RUN mkdir -p uploads && chmod 755 uploads
+# Create runtime directories with proper permissions
+RUN mkdir -p uploads logs && chmod -R 755 uploads logs
 
 # Create a non-root user for improved container security
 RUN addgroup -S app && adduser -S app -G app

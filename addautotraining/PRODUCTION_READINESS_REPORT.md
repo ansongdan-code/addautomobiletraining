@@ -163,6 +163,8 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-12345
 docker-compose up -d
 ```
 
+> Note: `docker-compose.yml` is configured to use `.env.production` automatically.
+
 ### Stop Services
 ```bash
 docker-compose down

@@ -249,7 +249,6 @@ const VisualAppEditor = ({ userRole, onMount }) => {
         return;
       }
       
-      console.log('Saving styles:', styleForm);
       const response = await axios.put('/api/editor/app/styles', styleForm, {
         headers: { Authorization: `Bearer ${token}` }
       });

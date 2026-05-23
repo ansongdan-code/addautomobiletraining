@@ -47,7 +47,6 @@ function Contact() {
       return;
     }
 
-    console.log('Contact form submission:', formData);
     showNotification('Message sent successfully! We will get back to you soon.', 'success');
     setFormData({
       name: '',

@@ -40,32 +40,35 @@ const storage = multer.diskStorage({
 });
 
 // File filter
+const allowedImageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+const allowedDocumentExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'];
+
 const fileFilter = (req, file, cb) => {
+  const extension = path.extname(file.originalname).toLowerCase();
+  const isImageMime = file.mimetype.startsWith('image/');
+  const isAllowedImageExtension = allowedImageExtensions.includes(extension);
+  const allowedDocumentTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain'
+  ];
+
   if (file.fieldname === 'logo' || file.fieldname === 'favicon' || 
       file.fieldname === 'featuredImage' || file.fieldname === 'images' || 
       file.fieldname === 'courseImage' || file.fieldname === 'avatar') {
-    // Accept images only
-    if (file.mimetype.startsWith('image/')) {
+    if (isImageMime && isAllowedImageExtension) {
       cb(null, true);
     } else {
       cb(new Error('Only image files are allowed!'), false);
     }
   } else {
-    // Accept documents and other files
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'text/plain',
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp'
-    ];
-    
-    if (allowedTypes.includes(file.mimetype)) {
+    const isAllowedDocument = allowedDocumentTypes.includes(file.mimetype);
+    const isAllowedImage = isImageMime && isAllowedImageExtension;
+
+    if (isAllowedDocument || isAllowedImage) {
       cb(null, true);
     } else {
       cb(new Error('File type not allowed!'), false);

@@ -45,6 +45,18 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const sanitizeCSS = (css) => {
+    if (!css || typeof css !== 'string') return '';
+    return css
+      .replace(/<\/(style)>/gi, '')
+      .replace(/<style[^>]*>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/vbscript:/gi, '')
+      .replace(/expression\s*\(/gi, '')
+      .replace(/url\s*\(\s*["']?\s*javascript:/gi, 'url(')
+      .replace(/url\s*\(\s*["']?\s*vbscript:/gi, 'url(');
+  };
+
   // Check for existing user on component mount
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -88,7 +100,7 @@ function App() {
         }
         const data = await res.json();
         if (cancelled) return;
-        const css = data.data && data.data.customCSS ? data.data.customCSS : '';
+        const css = data.data && data.data.customCSS ? sanitizeCSS(data.data.customCSS) : '';
 
         // update or create style tag
         let styleTag = document.getElementById(styleId);
@@ -97,31 +109,10 @@ function App() {
           styleTag.id = styleId;
           document.head.appendChild(styleTag);
         }
-        styleTag.innerHTML = css || '';
+        styleTag.textContent = css || '';
 
-        // Inject page-level custom JavaScript safely
-        const jsId = 'page-custom-js';
-        const removeScript = () => {
-          const existingScript = document.getElementById(jsId);
-          if (existingScript) existingScript.remove();
-        };
-
-        removeScript();
-        const pageJS = data.data && data.data.customJavaScript ? data.data.customJavaScript : '';
-        if (pageJS && pageJS.trim()) {
-          try {
-            const scriptTag = document.createElement('script');
-            scriptTag.id = jsId;
-            scriptTag.type = 'text/javascript';
-            // Avoid using src or eval; set textContent to inline JS
-            scriptTag.textContent = pageJS;
-            // Append at end of body so it runs after DOM
-            document.body.appendChild(scriptTag);
-          } catch (err) {
-            console.error('Failed to inject page customJavaScript', err);
-            removeScript();
-          }
-        }
+        // Page custom JavaScript is intentionally disabled for security.
+        // This prevents stored script injection from page data.
       } catch (err) {
         console.error('Failed to load page customCSS', err);
         removeStyle();
@@ -134,33 +125,26 @@ function App() {
   }, [location.pathname]);
 
   const showLoginForm = () => {
-    console.log('Opening login modal');
     setLoginModalOpen(true);
   };
 
   const closeLoginForm = () => {
-    console.log('Closing login modal');
     setLoginModalOpen(false);
   };
 
   const showRegisterForm = () => {
-    console.log('Opening register modal');
     setRegisterModalOpen(true);
   };
 
   const closeRegisterForm = () => {
-    console.log('Closing register modal');
     setRegisterModalOpen(false);
   };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login form submitted');
     const formData = new FormData(e.target);
     const email = formData.get('email');
     const password = formData.get('password');
-    
-    console.log('Login data:', { email, password: password ? '***' : 'empty' });
     
     if (!email || !password) {
       showNotification('Please fill in all fields', 'error');
@@ -215,14 +199,11 @@ function App() {
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    console.log('Register form submitted');
     const formData = new FormData(e.target);
     const fullName = formData.get('fullName');
     const email = formData.get('email');
     const password = formData.get('password');
     const confirmPassword = formData.get('confirmPassword');
-    
-    console.log('Register data:', { fullName, email, password: password ? '***' : 'empty', confirmPassword: confirmPassword ? '***' : 'empty' });
     
     if (!fullName || !email || !password || !confirmPassword) {
       showNotification('Please fill in all fields', 'error');

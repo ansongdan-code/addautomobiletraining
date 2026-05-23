@@ -25,11 +25,15 @@ docker-compose down -v
 docker-compose up --build -d
 ```
 
+> Note: `docker-compose.yml` uses `.env.production` automatically when starting the stack.
+
 ### Production Deployment
 ```bash
 # For production with SSL reverse proxy
 docker-compose -f docker-compose.production.yml up --build -d
 ```
+
+> Optional: use the default compose stack for local production testing with `docker-compose up -d`.
 
 ## 📱 Mobile App Deployment
 

@@ -1,14 +1,16 @@
+version: '3.9'
+
 services:
   mongo:
     image: mongo:6
-    container_name: addauto_mongo
+    container_name: addauto_mongo_prod
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: addautotraining
     volumes:
-      - mongo_data:/data/db
+      - mongo_prod_data:/data/db
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
@@ -18,16 +20,9 @@ services:
       - app-network
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: addauto_backend
+    image: ansongdan-code/addautotraining-backend:latest
+    container_name: addauto_backend_prod
     restart: always
-    ports:
-      - "5000:5000"
-    depends_on:
-      mongo:
-        condition: service_healthy
     env_file:
       - .env.production
     environment:
@@ -35,38 +30,42 @@ services:
       - MONGO_URI=mongodb://admin:${MONGO_PASSWORD}@mongo:27017/addautotraining?authSource=admin
       - JWT_SECRET=${JWT_SECRET}
       - FRONTEND_URL=${FRONTEND_URL}
-      - LOG_DIR=/app/logs
-      - LOG_LEVEL=info
-      - ENABLE_FILE_LOGGING=true
     volumes:
       - ./uploads:/app/uploads
-      - ./logs:/app/logs
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "5"
+    depends_on:
+      mongo:
+        condition: service_healthy
     networks:
       - app-network
 
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - REACT_APP_API_URL=http://localhost:5000/api
-        - REACT_APP_PAYPAL_CLIENT_ID=${REACT_APP_PAYPAL_CLIENT_ID}
-    container_name: addauto_frontend
+    image: ansongdan-code/addautotraining-frontend:latest
+    container_name: addauto_frontend_prod
     restart: always
-    ports:
-      - "3000:80"
     depends_on:
       - backend
     networks:
       - app-network
 
+  nginx:
+    image: nginx:alpine
+    container_name: addauto_nginx_prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+
 volumes:
-  mongo_data:
+  mongo_prod_data:
 
 networks:
   app-network:

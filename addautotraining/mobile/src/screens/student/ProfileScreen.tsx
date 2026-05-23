@@ -2,16 +2,17 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
-import { RootState } from '../../store';
+import { RootState, AppDispatch } from '../../store';
 import { showSuccessToast } from '../../utils/toast';
 import { COLORS } from '../../constants/colors';
 
 const ProfileScreen = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
 
   const handleLogout = () => {
     dispatch(logout());
+
     showSuccessToast('Logged Out', 'See you next time!');
   };
 

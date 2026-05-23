@@ -60,13 +60,8 @@ const AdminDashboard = () => {
     }
 
     setUserRole(user.role);
-    console.log('[AdminDashboard] userRole set to', user.role);
     fetchDashboardStats();
   }, [fetchDashboardStats, navigate]);
-
-  useEffect(() => {
-    console.log('[AdminDashboard] activeTab changed:', activeTab);
-  }, [activeTab]);
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('token');
