@@ -1,21 +1,6 @@
 const videoService = require('../services/videoService');
-const logger = require('../utils/logger');
 
-const handleError = (res, error, context) => {
-  const statusCode = error.statusCode || 500;
-  if (statusCode >= 500) {
-    logger.error(`${context}: ${error.message}`, { stack: error.stack });
-  } else {
-    logger.warn(`${context}: ${error.message}`);
-  }
-
-  return res.status(statusCode).json({
-    success: false,
-    error: statusCode >= 500 ? 'Server error' : error.message
-  });
-};
-
-exports.addVideo = async (req, res) => {
+exports.addVideo = async (req, res, next) => {
   try {
     const video = await videoService.addVideoToCourse({
       courseId: req.params.courseId,
@@ -25,29 +10,29 @@ exports.addVideo = async (req, res) => {
     });
     res.status(201).json({ success: true, data: video });
   } catch (error) {
-    return handleError(res, error, 'Error adding video');
+    next(error);
   }
 };
 
-exports.getVideosByCourse = async (req, res) => {
+exports.getVideosByCourse = async (req, res, next) => {
   try {
     const videos = await videoService.getVideosByCourse(req.params.courseId);
     res.json({ success: true, data: { videos } });
   } catch (error) {
-    return handleError(res, error, 'Error fetching course videos');
+    next(error);
   }
 };
 
-exports.getVideo = async (req, res) => {
+exports.getVideo = async (req, res, next) => {
   try {
     const video = await videoService.getVideoById(req.params.id);
     res.json({ success: true, data: video });
   } catch (error) {
-    return handleError(res, error, 'Error fetching video');
+    next(error);
   }
 };
 
-exports.updateVideo = async (req, res) => {
+exports.updateVideo = async (req, res, next) => {
   try {
     const video = await videoService.updateVideo({
       videoId: req.params.id,
@@ -57,11 +42,11 @@ exports.updateVideo = async (req, res) => {
     });
     res.json({ success: true, data: video });
   } catch (error) {
-    return handleError(res, error, 'Error updating video');
+    next(error);
   }
 };
 
-exports.deleteVideo = async (req, res) => {
+exports.deleteVideo = async (req, res, next) => {
   try {
     const data = await videoService.deleteVideo({
       videoId: req.params.id,
@@ -70,15 +55,15 @@ exports.deleteVideo = async (req, res) => {
     });
     res.json({ success: true, message: data.message });
   } catch (error) {
-    return handleError(res, error, 'Error deleting video');
+    next(error);
   }
 };
 
-exports.searchVideos = async (req, res) => {
+exports.searchVideos = async (req, res, next) => {
   try {
     const videos = await videoService.searchVideos(req.params.query);
     res.json({ success: true, data: videos });
   } catch (error) {
-    return handleError(res, error, 'Error searching videos');
+    next(error);
   }
 };

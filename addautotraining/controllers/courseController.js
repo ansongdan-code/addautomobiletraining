@@ -1,26 +1,12 @@
 const courseManagementService = require('../services/courseManagementService');
-const logger = require('../utils/logger');
+const { sendSuccess } = require('../utils/response');
 
 const parseInteger = (value, fallback) => {
   const parsed = parseInt(value, 10);
   return Number.isNaN(parsed) ? fallback : parsed;
 };
 
-const handleError = (res, error, context) => {
-  const statusCode = error.statusCode || 500;
-  if (statusCode >= 500) {
-    logger.error(`${context}: ${error.message}`, { stack: error.stack });
-  } else {
-    logger.warn(`${context}: ${error.message}`);
-  }
-
-  return res.status(statusCode).json({
-    success: false,
-    error: statusCode >= 500 ? 'Server error' : error.message
-  });
-};
-
-exports.getCourses = async (req, res) => {
+exports.getCourses = async (req, res, next) => {
   try {
     const data = await courseManagementService.getCourses({
       page: parseInteger(req.query.page, 1),
@@ -28,47 +14,47 @@ exports.getCourses = async (req, res) => {
       search: req.query.search || ''
     });
 
-    res.json({ success: true, data });
+    return sendSuccess(res, data);
   } catch (error) {
-    return handleError(res, error, 'Error fetching courses');
+    next(error);
   }
 };
 
-exports.getCourse = async (req, res) => {
+exports.getCourse = async (req, res, next) => {
   try {
     const course = await courseManagementService.getCourseById(req.params.id);
-    res.json({ success: true, data: course });
+    return sendSuccess(res, course);
   } catch (error) {
-    return handleError(res, error, 'Error fetching course');
+    next(error);
   }
 };
 
-exports.createCourse = async (req, res) => {
+exports.createCourse = async (req, res, next) => {
   try {
     const course = await courseManagementService.createCourse({
       ...req.body,
       instructor: req.user.id
     });
-    res.status(201).json({ success: true, data: course });
+    return sendSuccess(res, course, 201);
   } catch (error) {
-    return handleError(res, error, 'Error creating course');
+    next(error);
   }
 };
 
-exports.updateCourse = async (req, res) => {
+exports.updateCourse = async (req, res, next) => {
   try {
     const course = await courseManagementService.updateCourse(req.params.id, req.body);
-    res.json({ success: true, data: course });
+    return sendSuccess(res, course);
   } catch (error) {
-    return handleError(res, error, 'Error updating course');
+    next(error);
   }
 };
 
-exports.deleteCourse = async (req, res) => {
+exports.deleteCourse = async (req, res, next) => {
   try {
     const data = await courseManagementService.deleteCourse(req.params.id);
-    res.json({ success: true, message: data.message });
+    return sendSuccess(res, null, 200, data.message);
   } catch (error) {
-    return handleError(res, error, 'Error deleting course');
+    next(error);
   }
 };

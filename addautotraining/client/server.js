@@ -103,8 +103,8 @@ app.use('/api/auth', authLimiter);
 app.use('/api/admin', uploadLimiter);
 app.use('/api', generalLimiter);
 
-// Static file serving with caching
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+// Static file serving with caching (serve uploads from repository root)
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
   maxAge: '7d',
   etag: true,
   lastModified: true

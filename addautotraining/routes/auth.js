@@ -39,6 +39,3 @@ router.post('/login', validateLogin, authController.login);
 router.get('/me', protect, authController.getMe);
 
 module.exports = router;
-
-
-module.exports = router;

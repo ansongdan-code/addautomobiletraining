@@ -1,32 +1,11 @@
-import React, { useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { Provider, useDispatch } from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
-import Toast from 'react-native-toast-message';
-import { store } from './src/store';
+import React, { useEffect } from \u0027react\u0027;\nimport { StatusBar } from \u0027expo-status-bar\u0027;\nimport { Provider, useDispatch } from \u0027react-redux\u0027;\nimport * as SecureStore from \u0027expo-secure-store\u0027;\nimport Toast from \u0027react-native-toast-message\u0027;\nimport { store } from \u0027./src/store\u0027;\n
 import { setCredentials } from './src/store/slices/authSlice';
 import RootNavigator from './src/navigation/RootNavigator';
 
 const AppContent = () => {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        const userString = await SecureStore.getItemAsync('user');
-        if (token && userString) {
-          const user = JSON.parse(userString);
-          dispatch(setCredentials({ user, token }));
-        }
-      } catch (error) {
-        console.error('Failed to load auth data:', error);
-      }
-    };
-
-    initializeAuth();
-  }, [dispatch]);
+  useEffect(() \u003d\u003e {\n    const initializeAuth \u003d async () \u003d\u003e {\n      try {\n        const token \u003d await SecureStore.getItemAsync(\u0027token\u0027);\n        const userString \u003d await SecureStore.getItemAsync(\u0027user\u0027);\n        if (token \u0026\u0026 userString) {\n          const user \u003d JSON.parse(userString);\n          dispatch(setCredentials({ user, token }));\n        }\n      } catch (error) {\n        console.error(\u0027Failed to load auth data:\u0027, error);\n      }\n    };\n\n    initializeAuth();\n  }, [dispatch]);\n
 
   return <RootNavigator />;
 };

@@ -34,5 +34,3 @@ router.get('/:id', courseController.getCourse);
 module.exports = router;
 
 
-module.exports = router;
-

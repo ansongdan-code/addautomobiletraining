@@ -22,6 +22,18 @@ const validateBlogPostPayload = [
   }
 ];
 
+const validateUserUpdate = [
+  check('role', 'Valid role is required').optional().isIn(['student', 'instructor', 'admin', 'super_admin']),
+  check('isActive', 'isActive must be boolean').optional().isBoolean(),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Dashboard stats
 router.get('/dashboard', [protect, isAdmin], adminController.getDashboard);
 
@@ -29,7 +41,7 @@ router.get('/dashboard', [protect, isAdmin], adminController.getDashboard);
 router.get('/users', [protect, isAdmin], adminController.getUsers);
 
 // Update user
-router.put('/users/:id', [protect, isAdmin], adminController.updateUser);
+router.put('/users/:id', [protect, isAdmin, ...validateUserUpdate], adminController.updateUser);
 
 // Get all courses with pagination
 router.get('/courses', [protect, isAdmin], adminController.getCourses);

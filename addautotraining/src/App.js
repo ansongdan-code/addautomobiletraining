@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
+import AIChatAssistant from './components/AIChatAssistant';
 
 // Lazy load components for better performance
 const Dashboard = React.lazy(() => import('./Dashboard'));
@@ -11,6 +12,7 @@ const Payment = React.lazy(() => import('./Payment'));
 
 // Basic notification utility
 export const showNotification = (message, type = 'info') => {
+
   const notificationDiv = document.createElement('div');
   notificationDiv.className = `notification ${type}`;
   notificationDiv.textContent = message;
@@ -656,8 +658,10 @@ function App() {
           </div>
         </div>
       </footer>
+      <AIChatAssistant />
     </div>
   );
 }
+
 
 export default App;

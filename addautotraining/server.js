@@ -42,12 +42,6 @@ const validateProductionEnv = () => {
 
 validateProductionEnv();
 
-const User = require('./models/User');
-const Course = require('./models/Course');
-const Video = require('./models/Video');
-const BlogPost = require('./models/BlogPost');
-const WebsiteSettings = require('./models/WebsiteSettings');
-
 const authRoutes = require('./routes/auth');
 const courseRoutes = require('./routes/course');
 const videoRoutes = require('./routes/video');
@@ -56,6 +50,8 @@ const blogRoutes = require('./routes/blog');
 const paymentRoutes = require('./routes/payment');
 const websiteEditorRoutes = require('./routes/website-editor');
 const appEditorRoutes = require('./routes/app-editor');
+const agentRoutes = require('./routes/agent');
+const errorHandler = require('./middleware/error');
 
 const app = express();
 
@@ -77,9 +73,13 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
 
 // Compression middleware for better performance
 app.use(compression());
+
+// Sanitize data
+app.use(mongoSanitize());
 
 // Enhanced security with helmet
 app.use(helmet({
@@ -134,7 +134,7 @@ app.use('/api/payment/paystack/webhook', express.raw({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// MongoDB connection with optimizations and retry logic
+// MongoDB connection
 const connectDB = async () => {
   try {
     logger.info('Connecting to MongoDB...');
@@ -153,37 +153,37 @@ const connectDB = async () => {
 
 connectDB();
 
-// Rate limiting with different limits for different endpoints
+// Rate limiting
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5000, // Increased from 1000 to prevent admin dashboard from being blocked
-  message: 'Too many requests from this IP, please try again later.',
+  windowMs: 15 * 60 * 1000,
+  max: 5000,
+  message: 'Too many requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // More restrictive for auth endpoints
-  message: 'Too many authentication attempts, please try again later.',
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: 'Too many login attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-const uploadLimiter = rateLimit({
+const agentLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 50, // Limit file uploads
-  message: 'Too many file uploads, please try again later.',
+  max: 50,
+  message: 'AI Agent quota exceeded for this hour.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 // Apply rate limiting
-app.use('/api/auth', authLimiter);
-app.use('/api/admin', uploadLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/agent', agentLimiter);
 app.use('/api', generalLimiter);
 
-// Static file serving with caching
+// Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
   maxAge: '7d',
   etag: true,
@@ -199,6 +199,9 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/website', websiteEditorRoutes);
 app.use('/api/editor', appEditorRoutes);
+app.use('/api/agent', agentRoutes);
+
+// Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   explorer: true
 }));
@@ -206,166 +209,45 @@ app.get('/api-docs.json', (req, res) => {
   res.json(swaggerSpec);
 });
 
-// PayPal integration (legacy)
-const clientId = process.env.PAYPAL_CLIENT_ID;
-const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-if (paypal && clientId && clientSecret) {
-  const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
-  const client = new paypal.core.PayPalHttpClient(environment);
-  
-  // Create PayPal order
-  app.post('/api/orders', async (req, res) => {
-    const request = new paypal.orders.OrdersCreateRequest();
-    request.prefer('return=representation');
-    request.requestBody({
-      intent: 'CAPTURE',
-      purchase_units: [{
-        amount: {
-          currency_code: 'USD',
-          value: req.body.amount || '10.00'
-        }
-      }]
-    });
-  
-    try {
-      const order = await client.execute(request);
-      res.json({ id: order.result.id });
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  
-  // Capture PayPal order
-  app.post('/api/orders/:orderID/capture', async (req, res) => {
-    const { orderID } = req.params;
-    const request = new paypal.orders.OrdersCaptureRequest(orderID);
-    request.requestBody({});
-  
-    try {
-      const capture = await client.execute(request);
-      res.json(capture.result);
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-}
-
-// Website settings endpoint
-app.get('/api/settings', async (req, res) => {
-  try {
-    const settings = await WebsiteSettings.getSettings();
-    res.json({
-      success: true,
-      data: {
-        siteName: settings.siteName,
-        siteDescription: settings.siteDescription,
-        logo: settings.logo,
-        favicon: settings.favicon,
-        primaryColor: settings.primaryColor,
-        secondaryColor: settings.secondaryColor,
-        socialMedia: settings.socialMedia,
-        seo: settings.seo
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch website settings'
-    });
-  }
-});
-
-// Global search endpoint
-app.get('/api/search', async (req, res) => {
-  try {
-    const { q, type } = req.query;
-    
-    if (!q) {
-      return res.status(400).json({
-        success: false,
-        error: 'Search query is required'
-      });
-    }
-
-    let results = { courses: [], videos: [], blogs: [] };
-
-    if (!type || type === 'courses') {
-      results.courses = await Course.find({
-        $text: { $search: q },
-        status: 'published'
-      }).limit(10).select('title description price level category');
-    }
-
-    if (!type || type === 'videos') {
-      results.videos = await Video.find({
-        $text: { $search: q },
-        isPublic: true,
-        isActive: true
-      }).limit(10).select('title description thumbnailUrl duration');
-    }
-
-    if (!type || type === 'blogs') {
-      results.blogs = await BlogPost.find({
-        $text: { $search: q },
-        status: 'published'
-      }).limit(10).select('title excerpt slug publishedAt');
-    }
-
-    res.json({
-      success: true,
-      data: results
-    });
-  } catch (error) {
-    logger.error(`Search error: ${error.message}`, { stack: error.stack });
-    res.status(500).json({
-      success: false,
-      error: 'Search failed'
-    });
-  }
-});
-
-// Health check endpoint
+// Health check
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage()
+    uptime: process.uptime()
   });
 });
 
-
-// Serve React app in production
+// Serve React app
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'build')));
-
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
   });
 }
 
+// Global Error Handler (MUST BE LAST)
+app.use(errorHandler);
+
+// Export app for reuse in tests or alternative servers
+module.exports = app;
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
+const shutdown = () => {
+  logger.info('Shutting down gracefully...');
   server.close(() => {
-    logger.info('Process terminated');
-    mongoose.connection.close();
-    process.exit(0);
+    logger.info('HTTP server closed');
+    mongoose.connection.close(false, () => {
+      logger.info('MongoDB connection closed');
+      process.exit(0);
+    });
   });
-});
+};
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    logger.info('Process terminated');
-    mongoose.connection.close();
-    process.exit(0);
-  });
-});
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

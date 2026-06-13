@@ -198,19 +198,7 @@ module.exports = {
         }
       }
     },
-    '/api/videos/youtube/{courseId}': {
-      post: {
-        tags: ['Videos'],
-        summary: 'Add a YouTube video to a course',
-        security: [{ bearerAuth: [] }],
-        parameters: [{ name: 'courseId', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: {
-          201: { description: 'Video added' },
-          403: { description: 'Forbidden' }
-        }
-      }
-    },
-    '/api/blog/posts': {
+    \u0027/api/videos/youtube/{courseId}\u0027: {\n      post: {\n        tags: [\u0027Videos\u0027],\n        summary: \u0027Add a YouTube video to a course\u0027,\n        security: [{ bearerAuth: [] }],\n        parameters: [{ name: \u0027courseId\u0027, in: \u0027path\u0027, required: true, schema: { type: \u0027string\u0027 } }],\n        responses: {\n          201: { description: \u0027Video added\u0027 },\n          403: { description: \u0027Forbidden\u0027 }\n        }\n      }\n    },\n    \u0027/api/agent/chat\u0027: {\n      post: {\n        tags: [\u0027AI Agent\u0027],\n        summary: \u0027Chat with the AddAuto Assistant\u0027,\n        requestBody: {\n          required: true,\n          content: {\n            \u0027application/json\u0027: {\n              schema: {\n                type: \u0027object\u0027,\n                required: [\u0027query\u0027],\n                properties: {\n                  query: { type: \u0027string\u0027 }\n                }\n              }\n            }\n          }\n        },\n        responses: {\n          200: { description: \u0027AI response returned\u0027 }\n        }\n      }\n    },\n    \u0027/api/blog/posts\u0027: {\n
 
       get: {
         tags: ['Blog'],

@@ -12,11 +12,13 @@ const express = require('express');
 const authRoutes = require('../routes/auth');
 const adminRoutes = require('../routes/admin');
 const { protect, isAdmin } = require('../middleware/auth');
+const errorHandler = require('../middleware/error');
 
 const app = express();
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use(errorHandler);
 
 // Test database connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/addautotraining_test';
@@ -97,10 +99,10 @@ describe('Admin Login Test Suite', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('token');
+      expect(response.body.data).toHaveProperty('token');
       
       // Verify token is valid
-      const decoded = jwt.verify(response.body.token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(response.body.data.token, process.env.JWT_SECRET || 'dev_jwt_secret');
       expect(decoded.id).toBe(adminUser._id.toString());
     });
 
@@ -113,7 +115,7 @@ describe('Admin Login Test Suite', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.msg).toBe('Invalid credentials');
+      expect(response.body.error).toBe('Invalid credentials');
     });
 
     test('Admin login should fail with non-existent email', async () => {
@@ -125,7 +127,7 @@ describe('Admin Login Test Suite', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.msg).toBe('Invalid credentials');
+      expect(response.body.error).toBe('Invalid credentials');
     });
 
     test('Admin login should fail with missing email', async () => {
@@ -163,7 +165,7 @@ describe('Admin Login Test Suite', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.msg).toBe('Account is deactivated');
+      expect(response.body.error).toBe('Account is deactivated');
     });
   });
 
@@ -175,7 +177,7 @@ describe('Admin Login Test Suite', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveProperty('stats');
+      expect(response.body.data.stats).toBeDefined();
     });
 
     test('Regular user should not be able to access admin dashboard', async () => {
@@ -202,8 +204,8 @@ describe('Admin Login Test Suite', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveProperty('users');
-      expect(response.body.data).toHaveProperty('pagination');
+      expect(response.body.data.users).toBeDefined();
+      expect(response.body.data.pagination).toBeDefined();
     });
 
     test('Admin should be able to update user roles', async () => {
@@ -227,7 +229,7 @@ describe('Admin Login Test Suite', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveProperty('courses');
+      expect(response.body.data.courses).toBeDefined();
     });
 
     test('Admin should be able to access blog management', async () => {
@@ -237,7 +239,7 @@ describe('Admin Login Test Suite', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveProperty('posts');
+      expect(response.body.data.posts).toBeDefined();
     });
 
     test('Admin should be able to access website settings', async () => {
@@ -257,8 +259,8 @@ describe('Admin Login Test Suite', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveProperty('topCourses');
-      expect(response.body.data).toHaveProperty('revenueData');
+      expect(response.body.data.topCourses).toBeDefined();
+      expect(response.body.data.revenueData).toBeDefined();
     });
   });
 
@@ -314,7 +316,7 @@ describe('Admin Login Test Suite', () => {
     test('Expired token should be rejected', async () => {
       const expiredToken = jwt.sign(
         { id: adminUser._id },
-        process.env.JWT_SECRET,
+        process.env.JWT_SECRET || 'dev_jwt_secret',
         { expiresIn: '1ms' }
       );
 
@@ -333,7 +335,7 @@ describe('Admin Login Test Suite', () => {
       const fakeUserId = new mongoose.Types.ObjectId();
       const fakeToken = jwt.sign(
         { id: fakeUserId },
-        process.env.JWT_SECRET,
+        process.env.JWT_SECRET || 'dev_jwt_secret',
         { expiresIn: '1h' }
       );
 

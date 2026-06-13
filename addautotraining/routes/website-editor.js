@@ -22,6 +22,3 @@ router.put('/editor/pages/:id', [protect, isAdmin], websiteEditorController.upda
 router.delete('/editor/pages/:id', [protect, isAdmin], websiteEditorController.deletePage);
 
 module.exports = router;
-
-
-module.exports = router;

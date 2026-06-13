@@ -36,6 +36,3 @@ router.get('/:id', protect, videoController.getVideo);
 router.get('/search/:query', videoController.searchVideos);
 
 module.exports = router;
-
-
-module.exports = router;

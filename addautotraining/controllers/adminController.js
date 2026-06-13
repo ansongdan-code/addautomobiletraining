@@ -1,6 +1,5 @@
 const adminService = require('../services/adminService');
 const { getFileUrl } = require('../middleware/upload');
-const logger = require('../utils/logger');
 
 const parseInteger = (value, fallback) => {
   const parsed = parseInt(value, 10);
@@ -20,21 +19,7 @@ const parsePotentialJsonFields = (payload) => {
   return updateData;
 };
 
-const handleError = (res, error, context) => {
-  const statusCode = error.statusCode || 500;
-  if (statusCode >= 500) {
-    logger.error(`${context}: ${error.message}`, { stack: error.stack });
-  } else {
-    logger.warn(`${context}: ${error.message}`);
-  }
-
-  return res.status(statusCode).json({
-    success: false,
-    error: statusCode >= 500 ? 'Server error' : error.message
-  });
-};
-
-exports.getDashboard = async (req, res) => {
+exports.getDashboard = async (req, res, next) => {
   try {
     const stats = await adminService.getDashboardStats();
     res.json({
@@ -42,11 +27,11 @@ exports.getDashboard = async (req, res) => {
       data: { stats }
     });
   } catch (error) {
-    return handleError(res, error, 'Error fetching dashboard stats');
+    next(error);
   }
 };
 
-exports.getUsers = async (req, res) => {
+exports.getUsers = async (req, res, next) => {
   try {
     const data = await adminService.getUsers({
       page: parseInteger(req.query.page, 1),
@@ -56,20 +41,20 @@ exports.getUsers = async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error fetching users');
+    next(error);
   }
 };
 
-exports.updateUser = async (req, res) => {
+exports.updateUser = async (req, res, next) => {
   try {
     const data = await adminService.updateUser(req.params.id, req.body);
     res.json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error updating user');
+    next(error);
   }
 };
 
-exports.getCourses = async (req, res) => {
+exports.getCourses = async (req, res, next) => {
   try {
     const data = await adminService.getCourses({
       page: parseInteger(req.query.page, 1),
@@ -79,20 +64,20 @@ exports.getCourses = async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error fetching courses');
+    next(error);
   }
 };
 
-exports.updateCourse = async (req, res) => {
+exports.updateCourse = async (req, res, next) => {
   try {
     const data = await adminService.updateCourse(req.params.id, req.body);
     res.json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error updating course');
+    next(error);
   }
 };
 
-exports.deleteCourse = async (req, res) => {
+exports.deleteCourse = async (req, res, next) => {
   try {
     const data = await adminService.deleteCourse(req.params.id);
     res.json({
@@ -100,11 +85,11 @@ exports.deleteCourse = async (req, res) => {
       message: data.message
     });
   } catch (error) {
-    return handleError(res, error, 'Error deleting course');
+    next(error);
   }
 };
 
-exports.getBlogPosts = async (req, res) => {
+exports.getBlogPosts = async (req, res, next) => {
   try {
     const data = await adminService.getBlogPosts({
       page: parseInteger(req.query.page, 1),
@@ -115,11 +100,11 @@ exports.getBlogPosts = async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error fetching blog posts');
+    next(error);
   }
 };
 
-exports.createBlogPost = async (req, res) => {
+exports.createBlogPost = async (req, res, next) => {
   try {
     const featuredImage = req.file ? getFileUrl(req, req.file.filename) : null;
     const data = await adminService.createBlogPost({
@@ -130,20 +115,20 @@ exports.createBlogPost = async (req, res) => {
 
     res.status(201).json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error creating blog post');
+    next(error);
   }
 };
 
-exports.updateBlogPost = async (req, res) => {
+exports.updateBlogPost = async (req, res, next) => {
   try {
     const data = await adminService.updateBlogPost(req.params.id, req.body);
     res.json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error updating blog post');
+    next(error);
   }
 };
 
-exports.deleteBlogPost = async (req, res) => {
+exports.deleteBlogPost = async (req, res, next) => {
   try {
     const data = await adminService.deleteBlogPost(req.params.id);
     res.json({
@@ -151,20 +136,20 @@ exports.deleteBlogPost = async (req, res) => {
       message: data.message
     });
   } catch (error) {
-    return handleError(res, error, 'Error deleting blog post');
+    next(error);
   }
 };
 
-exports.getSettings = async (req, res) => {
+exports.getSettings = async (req, res, next) => {
   try {
     const data = await adminService.getSettings();
     res.json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error fetching website settings');
+    next(error);
   }
 };
 
-exports.updateSettings = async (req, res) => {
+exports.updateSettings = async (req, res, next) => {
   try {
     const updateData = parsePotentialJsonFields(req.body);
 
@@ -186,15 +171,15 @@ exports.updateSettings = async (req, res) => {
     const data = await adminService.updateSettings(updateData, req.user.id);
     res.json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error updating website settings');
+    next(error);
   }
 };
 
-exports.getAnalytics = async (req, res) => {
+exports.getAnalytics = async (req, res, next) => {
   try {
     const data = await adminService.getAnalytics();
     res.json({ success: true, data });
   } catch (error) {
-    return handleError(res, error, 'Error fetching analytics');
+    next(error);
   }
 };

@@ -1,16 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
+const { protect } = require('../middleware/auth');
+const agentController = require('../controllers/agentController');
 
-router.use((req, res, next) => {
+// Optional authentication for chat, but allowed for guests too if we handle it
+router.post('/chat', (req, res, next) => {
+  // If token provided, try to authenticate, else continue as guest
   const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'No token' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded.isAdmin) return res.status(403).json({ error: 'Not authorized' });
-    next();
-  } catch (err) {
-    res.status(401).json({ error: 'Invalid token' });
+  if (token) {
+    return protect(req, res, next);
   }
-});
+  next();
+}, agentController.chat);
+
+// Protected routes
+router.get('/context', protect, agentController.getContext);
+
+module.exports = router;

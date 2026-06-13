@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { API_BASE_URL } from '../../config';
 
@@ -33,8 +32,8 @@ export const login = createAsyncThunk(
     const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
     const { user, token } = response.data.data;
 
-    // Side effects in thunk instead of reducer
-    await AsyncStorage.setItem('token', token);
+    // Use SecureStore for both token and user for maximum security on mobile
+    await SecureStore.setItemAsync('token', token);
     await SecureStore.setItemAsync('user', JSON.stringify(user));
 
     return response.data;
@@ -47,8 +46,7 @@ export const register = createAsyncThunk(
     const response = await axios.post(`${API_BASE_URL}/auth/register`, { name, email, password });
     const { user, token } = response.data.data;
 
-    // Side effects in thunk instead of reducer
-    await AsyncStorage.setItem('token', token);
+    await SecureStore.setItemAsync('token', token);
     await SecureStore.setItemAsync('user', JSON.stringify(user));
 
     return response.data;
@@ -56,7 +54,7 @@ export const register = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk('auth/logout', async () => {
-  await AsyncStorage.removeItem('token');
+  await SecureStore.deleteItemAsync('token');
   await SecureStore.deleteItemAsync('user');
   return null;
 });

@@ -9,6 +9,7 @@ import PaymentScreen from '../screens/student/PaymentScreen';
 import EnrolledCoursesScreen from '../screens/student/EnrolledCoursesScreen';
 import BlogScreen from '../screens/student/BlogScreen';
 import ProfileScreen from '../screens/student/ProfileScreen';
+import AIScreen from '../screens/student/AIScreen';
 import { COLORS } from '../constants/colors';
 
 const Tab = createBottomTabNavigator();
@@ -31,28 +32,33 @@ const TabNavigator = () => {
         tabBarInactiveTintColor: COLORS.gray,
       }}
     >
-      <Tab.Screen 
-        name="Home" 
+      <Tab.Screen
+        name="Home"
         component={HomeScreen}
         options={{ title: 'Home' }}
       />
-      <Tab.Screen 
-        name="MyCourses" 
+      <Tab.Screen
+        name="MyCourses"
         component={EnrolledCoursesScreen}
         options={{ title: 'My Courses' }}
       />
-      <Tab.Screen 
-        name="Courses" 
-        component={CoursesStack} 
+      <Tab.Screen
+        name="AI"
+        component={AIScreen}
+        options={{ title: 'Ask AI' }}
+      />
+      <Tab.Screen
+        name="Courses"
+        component={CoursesStack}
         options={{ title: 'Browse' }}
       />
-      <Tab.Screen 
-        name="Blog" 
+      <Tab.Screen
+        name="Blog"
         component={BlogScreen}
         options={{ title: 'Blog' }}
       />
-      <Tab.Screen 
-        name="Profile" 
+      <Tab.Screen
+        name="Profile"
         component={ProfileScreen}
         options={{ title: 'Profile' }}
       />

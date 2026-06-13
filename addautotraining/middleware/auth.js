@@ -1,12 +1,19 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Use env values with safe development defaults
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
 
 // Protect routes
 exports.protect = async (req, res, next) => {
+  if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+    return res.status(500).json({
+      success: false,
+      error: 'JWT_SECRET not configured'
+    });
+  }
+
+  const secret = JWT_SECRET || 'dev_jwt_secret';
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -21,7 +28,7 @@ exports.protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.id).select('-password');
     
     if (!user) {
@@ -88,15 +95,13 @@ exports.isInstructor = (req, res, next) => {
 
 // Generate JWT token
 exports.generateToken = (id) => {
-  if (!process.env.JWT_SECRET) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_SECRET is not set in environment');
-    } else {
-      console.warn('Warning: using default JWT secret for development/testing');
-    }
+  const secret = process.env.JWT_SECRET || 'dev_jwt_secret';
+
+  if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET is not set in environment');
   }
 
-  return jwt.sign({ id }, JWT_SECRET, {
+  return jwt.sign({ id }, secret, {
     expiresIn: JWT_EXPIRE
   });
 };

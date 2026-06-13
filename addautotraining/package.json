@@ -1,127 +1,128 @@
 {
-  "name": "addautotraining",
-  "version": "1.0.1",
-  "description": "Comprehensive automotive training platform with online courses, payments, and admin management",
-  "main": "server.js",
-  "keywords": [
-    "automotive",
-    "training",
-    "education",
-    "online-learning",
-    "courses",
-    "react",
-    "node",
-    "express",
-    "mongodb"
-  ],
-  "author": {
-    "name": "Auto Training Academy",
-    "email": "contact@autotrainingacademy.com",
-    "url": "https://autotrainingacademy.com"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/username/addautotraining.git"
-  },
-  "bugs": {
-    "url": "https://github.com/username/addautotraining/issues"
-  },
-  "homepage": "https://autotrainingacademy.com",
-  "private": false,
-  "engines": {
-    "node": ">=18.14.0",
-    "npm": ">=8.0.0"
-  },
-  "proxy": "http://localhost:5000",
-  "dependencies": {
-    "@paypal/paypal-js": "^8.2.0",
-    "@paypal/react-paypal-js": "^8.8.3",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.10.0",
-    "bcryptjs": "^2.4.3",
-    "body-parser": "^2.2.0",
-    "cloudinary": "^2.8.0",
-    "compression": "^1.8.0",
-    "cors": "^2.8.5",
-    "dotenv": "^17.0.0",
-    "eslint-config-react-app": "^7.0.1",
-    "express": "^4.21.2",
-    "express-rate-limit": "^7.5.1",
-    "express-validator": "^7.2.1",
-    "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.20.4",
-    "morgan": "^1.10.0",
-    "multer": "^2.0.1",
-    "multer-storage-cloudinary": "^2.2.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.15.0",
-    "slugify": "^1.6.6",
-    "swagger-ui-express": "^5.0.1",
-    "uuid": "^11.1.0",
-    "web-vitals": "^2.1.4",
-    "winston": "^3.18.3",
-    "winston-daily-rotate-file": "^5.0.0"
-  },
-  "scripts": {
-    "start": "node server.js",
-    "build": "react-scripts build",
-    "build:prod": "cross-env NODE_ENV=production npm run build",
-    "test": "react-scripts test",
-    "test:server": "cross-env NODE_ENV=test JWT_EXPIRE=1d jest --config jest.config.js --runInBand",
-    "test:all": "npm run test -- --watchAll=false && npm run test:server",
-    "test:coverage": "jest --coverage && react-scripts test --coverage --watchAll=false",
-    "test:watch": "jest --watch",
-    "test:admin": "jest test/admin-login.test.js --config jest.config.js",
-    "lint": "eslint src/ --ext .js,.jsx",
-    "lint:fix": "eslint src/ --ext .js,.jsx --fix",
-    "start:prod": "cross-env NODE_ENV=production node server.js",
-    "dev": "concurrently \"npm start\" \"react-scripts start\"",
-    "eject": "react-scripts eject"
-  },
-  "jest": {
-    "transformIgnorePatterns": [
-      "/node_modules/(?!axios)/"
-    ]
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+    "name": "addautotraining",
+    "version": "1.0.1",
+    "description": "Comprehensive automotive training platform with online courses, payments, and admin management",
+    "main": "server.js",
+    "keywords": [
+        "automotive",
+        "training",
+        "education",
+        "online-learning",
+        "courses",
+        "react",
+        "node",
+        "express",
+        "mongodb"
     ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@babel/preset-env": "^7.28.0",
-    "@babel/preset-react": "^7.27.1",
-    "babel-jest": "^29.7.0",
-    "concurrently": "^9.2.0",
-    "cross-env": "^10.0.0",
-    "identity-obj-proxy": "^3.0.0",
-    "jest": "^29.7.0",
-    "mongodb-memory-server": "^8.12.0",
-    "react-scripts": "^5.0.1",
-    "supertest": "^7.1.4"
-  },
-  "overrides": {
-    "nth-check": "^2.1.1",
-    "postcss": "^8.4.31",
-    "webpack-dev-server": "^5.2.0"
-  }
+    "author": {
+        "name": "Auto Training Academy",
+        "email": "contact@autotrainingacademy.com",
+        "url": "https://autotrainingacademy.com"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/username/addautotraining.git"
+    },
+    "bugs": {
+        "url": "https://github.com/username/addautotraining/issues"
+    },
+    "homepage": "https://autotrainingacademy.com",
+    "private": false,
+    "engines": {
+        "node": ">=18.14.0",
+        "npm": ">=8.0.0"
+    },
+    "proxy": "http://localhost:5000",
+    "dependencies": {
+        "@paypal/paypal-js": "^8.2.0",
+        "@paypal/react-paypal-js": "^8.8.3",
+        "@testing-library/dom": "^10.4.0",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^14.1.2",
+        "@testing-library/user-event": "^13.5.0",
+        "axios": "^1.10.0",
+        "bcryptjs": "^2.4.3",
+        "body-parser": "^2.2.0",
+        "cloudinary": "^2.8.0",
+        "compression": "^1.8.0",
+        "cors": "^2.8.5",
+        "dotenv": "^17.0.0",
+        "eslint-config-react-app": "^7.0.1",
+        "express": "^4.21.2",
+        "express-mongo-sanitize": "^2.2.0",
+        "express-rate-limit": "^7.5.1",
+        "express-validator": "^7.2.1",
+        "helmet": "^8.1.0",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.20.4",
+        "morgan": "^1.10.0",
+        "multer": "^2.0.1",
+        "multer-storage-cloudinary": "^2.2.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^6.15.0",
+        "slugify": "^1.6.6",
+        "swagger-ui-express": "^5.0.1",
+        "uuid": "^11.1.0",
+        "web-vitals": "^2.1.4",
+        "winston": "^3.18.3",
+        "winston-daily-rotate-file": "^5.0.0"
+    },
+    "scripts": {
+        "start": "node server.js",
+        "build": "node build-wrapper.js",
+        "build:root": "react-scripts build",
+        "build:client": "npm --prefix client run build",
+        "build:prod": "cross-env NODE_ENV=production npm run build",
+        "test": "react-scripts test",
+        "test:server": "cross-env NODE_ENV=test JWT_EXPIRE=1d jest --config jest.config.js --runInBand",
+        "test:all": "npm run test -- --watchAll=false && npm run test:server",
+        "test:coverage": "jest --coverage && react-scripts test --coverage --watchAll=false",
+        "test:watch": "jest --watch",
+        "test:admin": "jest test/admin-login.test.js --config jest.config.js",
+        "lint": "eslint src/ --ext .js,.jsx",
+        "lint:fix": "eslint src/ --ext .js,.jsx --fix",
+        "start:prod": "cross-env NODE_ENV=production node server.js",
+        "dev": "concurrently \"npm start\" \"react-scripts start\"",
+        "start:server-server": "node server/server.js",
+        "start:client-server": "node client/server.js",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.28.0",
+        "@babel/preset-react": "^7.27.1",
+        "babel-jest": "^29.7.0",
+        "concurrently": "^10.0.3",
+        "cross-env": "^10.0.0",
+        "identity-obj-proxy": "^3.0.0",
+        "jest": "^29.7.0",
+        "mongodb-memory-server": "^8.16.1",
+        "mongodb-memory-server-core": "^11.1.0",
+        "react-scripts": "^5.0.1",
+        "supertest": "^7.2.2"
+    },
+    "overrides": {
+        "nth-check": "^2.1.1",
+        "postcss": "^8.4.31",
+        "webpack-dev-server": "^5.2.0"
+    }
 }
