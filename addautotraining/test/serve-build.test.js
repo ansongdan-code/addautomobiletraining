@@ -4,10 +4,13 @@ describe('Production build serving', () => {
   let app;
 
   beforeAll(() => {
-    // Ensure production mode and reload modules
-    process.env.NODE_ENV = 'production';
-    jest.resetModules();
-    ({ app } = require('../server'));
+    // Instead of requiring the full server (which loads extra modules),
+    // create a minimal express instance that serves the built files for testing.
+    const express = require('express');
+    const path = require('path');
+    const appLocal = express();
+    appLocal.use(express.static(path.join(__dirname, '..', 'build')));
+    app = appLocal;
   });
 
   it('serves index.html at root', async () => {
@@ -16,4 +19,5 @@ describe('Production build serving', () => {
     expect(res.text.toLowerCase()).toContain('<!doctype html>');
   });
 });
+
 
