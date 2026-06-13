@@ -1,13 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const swaggerUi = require('swagger-ui-express');
-// PayPal SDK is optional; only require if available at runtime to avoid crashes
+// PayPal SDK is optional; prefer the maintained server SDK if available
 let paypal = null;
 try {
-  // attempt to require but do not throw if missing
-  paypal = require('@paypal/checkout-server-sdk');
-} catch (e) {
-  // optional dependency in some environments
+  // Try recommended package first
+  paypal = require('@paypal/paypal-server-sdk');
+} catch (e1) {
+  try {
+    // Fallback to legacy package if present
+    paypal = require('@paypal/checkout-server-sdk');
+  } catch (e2) {
+    // optional dependency in some environments
+  }
 }
 const path = require('path');
 const compression = require('compression');
@@ -232,22 +237,31 @@ app.use(errorHandler);
 // Export app for reuse in tests or alternative servers
 module.exports = app;
 
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-});
-
-// Graceful shutdown
-const shutdown = () => {
-  logger.info('Shutting down gracefully...');
-  server.close(() => {
-    logger.info('HTTP server closed');
-    mongoose.connection.close(false, () => {
-      logger.info('MongoDB connection closed');
-      process.exit(0);
-    });
+const startServer = () => {
+  const PORT = process.env.PORT || 5000;
+  const server = app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
   });
+
+  // Graceful shutdown
+  const shutdown = () => {
+    logger.info('Shutting down gracefully...');
+    server.close(() => {
+      logger.info('HTTP server closed');
+      mongoose.connection.close(false, () => {
+        logger.info('MongoDB connection closed');
+        process.exit(0);
+      });
+    });
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 };
 
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
+// Start server only when this file is run directly.
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { app, startServer };
