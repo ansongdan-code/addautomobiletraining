@@ -13,6 +13,7 @@ ENV REACT_APP_PAYPAL_CLIENT_ID=$REACT_APP_PAYPAL_CLIENT_ID
 
 # Copy package files
 COPY package*.json ./
+COPY build-wrapper.js ./
 
 # Install dependencies using package-lock for reproducible frontend builds
 RUN npm ci --legacy-peer-deps

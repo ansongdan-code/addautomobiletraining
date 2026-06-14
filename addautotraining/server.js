@@ -234,10 +234,9 @@ if (process.env.NODE_ENV === 'production') {
 // Global Error Handler (MUST BE LAST)
 app.use(errorHandler);
 
-// Export app for reuse in tests or alternative servers
-module.exports = app;
-
-const startServer = () => {
+// Export app for use in Vercel and tests
+app.app = app;
+app.startServer = () => {
   const PORT = process.env.PORT || 5000;
   const server = app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
@@ -257,11 +256,12 @@ const startServer = () => {
 
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
+  return server;
 };
+
+module.exports = app;
 
 // Start server only when this file is run directly.
 if (require.main === module) {
-  startServer();
+  app.startServer();
 }
-
-module.exports = { app, startServer };

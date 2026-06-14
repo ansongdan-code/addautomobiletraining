@@ -42,7 +42,7 @@
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.10.0",
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^2.2.0",
     "cloudinary": "^2.8.0",
     "compression": "^1.8.0",
@@ -66,7 +66,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "build": "react-scripts build",
+    "build": "echo 'This is a wrapper package. Run build from the root directory.'",
     "build:prod": "cross-env NODE_ENV=production npm run build",
     "test": "react-scripts test",
     "test:server": "jest",
